@@ -1,21 +1,13 @@
-from tortoise import Tortoise, models, fields
-from orm_converter.tortoise_to_django import ConvertedModel
+from django.db import models
 
 
 class User(models.Model):
-    name = fields.CharField(description="Telegram username", max_length=255)
-    tg_id = fields.IntField(description="Telegram id", max_length=20)
+    tg_id = models.CharField("Telegram User ID", max_length=255)
+    username = models.CharField("Telegram Username", max_length=255)
 
-    def __str__(self):
-        return self.tg_id
-
-    class Meta:
-        table = "users"
+    def __str__(self) -> str:
+        return f"{self.username} - {self.tg_id}"
 
 
-def register_models() -> None:
-    Tortoise.init_models(
-        models_paths=["source.web.models"],
-        app_label="web",
-        _init_relations=False,
-    )
+class Comment(models.Model):
+    text = models.CharField("Message text", max_length=1000)

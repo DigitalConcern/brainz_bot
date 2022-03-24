@@ -18,6 +18,21 @@ def main():
 
     execute_from_command_line(sys.argv)
 
+    if "runserver" in sys.argv:
+        from objects import MyServer
+
+        return MyServer.run()
+    elif "runbot" in sys.argv:
+        from objects import MyBot
+
+        return MyBot.run()
+    elif "runapp" in sys.argv:
+        from objects import run_app
+
+        return run_app()
+
+    execute_from_command_line(sys.argv)
+
 
 if __name__ == "__main__":
     main()

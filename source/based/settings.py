@@ -40,7 +40,8 @@ INSTALLED_APPS = [
     'web',
     'bot',
     'crispy_forms',
-    'crispy_bootstrap5'
+    'crispy_bootstrap5',
+
 ]
 
 MIDDLEWARE = [
@@ -82,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': '12345',
+        'PASSWORD': '1234',
         'HOST': 'localhost',
         'PORT': '5432',
     }

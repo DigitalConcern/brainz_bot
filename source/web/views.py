@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView, CreateView
 from django.urls import reverse_lazy
 import asyncio
-
+from source.objects import bot
 from . import models
 from . import forms
 
@@ -24,9 +24,9 @@ class MailingPageView(CreateView):
     form_class = forms.CommentForm
     success_url = reverse_lazy('home')
 
-    async def get_success_url(self) -> str:
+    def get_success_url(self) -> str:
         text = self.request.POST.get('text')
-        # # bot = Bot("BOT_API_TOKEN")
-        # for user in User.objects.all():
-        #     await bot.send_message(user.tg_id, text)
-        # return await super().get_success_url()
+        # bot = Bot("BOT_API_TOKEN")
+        for user in models.User.objects.all():
+            bot.send_message(user.tg_id, text)
+        return  super().get_success_url()

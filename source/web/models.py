@@ -2,8 +2,8 @@ from django.db import models
 
 
 class User(models.Model):
-    tg_id = models.CharField("Telegram User ID", max_length=255)
-    username = models.CharField("Telegram Username", max_length=255)
+    tg_id = models.CharField("Telegram User ID", default=0, max_length=255)
+    username = models.CharField("Telegram Username", default=0, max_length=255)
 
     def __str__(self) -> str:
         return f"{self.username} - {self.tg_id}"

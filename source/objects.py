@@ -1,51 +1,65 @@
 import asyncio
 import logging
-import os
+import os, sys, time
 from multiprocessing import Process
-from os import getenv
-from pathlib import Path
+from django.core.asgi import get_asgi_application
+
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "based.settings")
 
 import uvicorn
-from aiogram import Bot, Dispatcher, executor
-from aiogram.contrib.fsm_storage.memory import MemoryStorage
-from django.core.asgi import get_asgi_application
-from dotenv import load_dotenv
+from telebot import TeleBot
+from bot import config
+from web import services
 
-BASE_DIR = Path(__file__).resolve().parent
+logging.basicConfig(level=logging.DEBUG)
 
-logging.basicConfig(level=logging.INFO)
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.web.settings")
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
-load_dotenv(BASE_DIR / "config" / ".env")
+# load_dotenv(BASE_DIR / "config" / ".env")
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 
 
 class MyBot:
-    storage = MemoryStorage()
+    bot = TeleBot(token=config.TOKEN, parse_mode="HTML")
 
-    bot = Bot(token=getenv("BOT_API_TOKEN"), parse_mode="HTML")
-    dp = Dispatcher(bot=bot, storage=storage)
+    @classmethod
+    def run(cls):
+        while True:
+            try:
+                cls.bot.polling(none_stop=True)
+            except:
+                print('roflan-ebalo 😎')
+                logging.error('error: {}'.format(sys.exc_info()[0]))
+                time.sleep(5)
 
-    Bot.set_current(bot)
-    Dispatcher.set_current(dp)
+    @staticmethod
+    @bot.message_handler(commands=['start'])
+    def start(message):
+        user, is_created = services.add_user(
+            tg_id=message.from_user.id,
+            name=message.from_user.username
+        )
 
-    # @classmethod
-    # def run(cls):
-    #     executor.start_polling(
-    #         cls.dp, on_startup=cls.on_startup, on_shutdown=cls.on_shutdown
-    #     )
+        if is_created:
+            message.answer("You have successfully registered in the bot!")
+        else:
+            message.answer("You are already registered in the bot!")
 
+    @staticmethod
+    @bot.message_handler(commands=['id'])
+    def send_my_id(message):
+        message.answer(
+            f"User Id: <b>{message.from_user.id}</b>\n" f"Chat Id: <b>{message.chat.id}</b>"
+        )
     # @staticmethod
     # async def on_startup(dp: Dispatcher):
     #     await register_apps(dp)
 
-    @staticmethod
-    async def on_shutdown(dp: Dispatcher):
-        pass
+    # @staticmethod
+    # async def on_shutdown(dp: Dispatcher):
+    #     pass
 
 
 class MyServer:
@@ -72,10 +86,10 @@ class MyServer:
 
 
 def run_app():
-    # bot = Process(target=MyBot.run)
+    bot = Process(target=MyBot.run)
     server = Process(target=MyServer.run)
 
-    # bot.start()
+    bot.start()
     server.start()
 
 

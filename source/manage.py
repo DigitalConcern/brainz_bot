@@ -6,7 +6,7 @@ import sys
 
 def main():
     """Run administrative tasks."""
-    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.web.settings")
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "based.settings")
     try:
         from django.core.management import execute_from_command_line
     except ImportError as exc:
@@ -16,19 +16,16 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
 
-    execute_from_command_line(sys.argv)
-
     if "runserver" in sys.argv:
         from objects import MyServer
-
         return MyServer.run()
+
     elif "runbot" in sys.argv:
         from objects import MyBot
-
         return MyBot.run()
+
     elif "runapp" in sys.argv:
         from objects import run_app
-
         return run_app()
 
     execute_from_command_line(sys.argv)

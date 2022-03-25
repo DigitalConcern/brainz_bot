@@ -16,9 +16,8 @@ EXPOSE 5432
 
 
 # Берем нужный базовый образ
-FROM python:3.8-alpine
+FROM python:3.8
 RUN apk update && apk add postgresql-dev
-RUN yum install gcc -y
 # Копируем все файлы из текущей директории в /app контейнера
 COPY . ./app
 # Устанавливаем все зависимости

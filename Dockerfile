@@ -17,11 +17,11 @@ EXPOSE 5432
 
 # Берем нужный базовый образ
 FROM python:3.8
-RUN apk update && apk add postgresql-dev
+RUN apt update && apt add postgresql-dev
 # Копируем все файлы из текущей директории в /app контейнера
 COPY . ./app
 # Устанавливаем все зависимости
-RUN apk update  && pip install -r /app/requirements.txt --no-cache-dir
+RUN apt update  && pip install -r /app/requirements.txt --no-cache-dir
 # Устанавливаем приложение (Подробнее смотри Distutils)
 RUN pip install -e /app
 # Говорим контейнеру какой порт слушай

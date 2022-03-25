@@ -24,7 +24,8 @@ COPY . ./app
 # Устанавливаем все зависимости
 RUN apk update  && pip install -r /app/requirements.txt --no-cache-dir
 # Устанавливаем приложение (Подробнее смотри Distutils)
-RUN pip install -e app
+#RUN pip install -e /app
+CMD python /app/source/objects.py
 # Говорим контейнеру какой порт слушай
 EXPOSE 8080
 # Запуск нашего приложения при старте контейнера

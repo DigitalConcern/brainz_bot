@@ -11,6 +11,7 @@ RUN chmod 0700 /var/lib/postgresql/data &&\
     psql -c "ALTER USER postgres WITH ENCRYPTED PASSWORD 'mysecurepassword';"
 
 EXPOSE 5432
+
 # Берем нужный базовый образ
 FROM python:3.8-alpine
 # Копируем все файлы из текущей директории в /app контейнера

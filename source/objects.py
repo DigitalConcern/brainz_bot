@@ -17,29 +17,6 @@ loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
 bot = telebot.TeleBot(TOKEN)
 
-def MyBot():
-    from source.web import services
-
-    @bot.message_handler(commands=["start"])
-    def start(message):
-        user, is_created = services.add_user(
-            tg_id=message.from_user.id,
-            username=message.from_user.username
-        )
-
-        if is_created:
-            bot.send_message(message.from_user.id, "You have successfully registered in the bot!")
-        else:
-            bot.send_message(message.from_user.id, "You are already registered in the bot!")
-
-    @bot.message_handler(commands=["id"])
-    def send_my_id(message):
-        bot.send_message(message.from_user.id,
-                         f"User Id: <b>{message.from_user.id}</b>\n" f"Chat Id: <b>{message.chat.id}</b>",
-                         parse_mode="HTML")
-
-    bot.polling(none_stop=True)
-
 
 class MyServer:
     app = get_asgi_application()
@@ -67,7 +44,7 @@ class MyServer:
 def run_app():
     server = Process(target=MyServer.run)
     server.start()
-    MyBot()
+    bot.polling(none_stop=True)
 
 
 if __name__ == "__main__":

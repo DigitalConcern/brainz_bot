@@ -17,6 +17,7 @@ EXPOSE 5432
 
 # Берем нужный базовый образ
 FROM python:3.8-alpine
+RUN apk add python-dev
 RUN apk update && apk add --virtual build-deps gcc python-dev musl-dev && apk add postgresql-dev
 # Копируем все файлы из текущей директории в /app контейнера
 COPY . ./app

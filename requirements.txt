@@ -1,5 +1,7 @@
-pyTelegramBotApi==4.4.0
-Django==4.0.3
-uvicorn~=0.14.0
-psycopg2~=2.8.6
-asyncpg~=0.23.0
+pyTelegramBotApi
+Django
+uvicorn
+psycopg2
+asyncpg
+crispy-bootstrap5
+django-crispy-forms

@@ -31,7 +31,7 @@ jobs:
     runs-on: [ubuntu-latest]
     steps:
       - name: save key
-        run: echo $'{{ secrets.BRAINZ_PRIVATE }}' > h.pem
+        run: echo ${{ secrets.BRAINZ_PRIVATE }}
       - name: Gayorgy
         run: chmod 600 h
       - name: Gayorgy

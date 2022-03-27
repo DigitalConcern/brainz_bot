@@ -6,6 +6,7 @@ from django.core.asgi import get_asgi_application
 import uvicorn
 import telebot
 from bot.config import *
+import time
 
 logging.basicConfig(level=logging.DEBUG)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "based.settings")
@@ -45,6 +46,7 @@ def run_app():
     server = Process(target=MyServer.run)
     server.start()
     bot.polling(none_stop=True)
+    time.sleep(60)
 
 
 if __name__ == "__main__":

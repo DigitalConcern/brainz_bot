@@ -30,5 +30,7 @@ jobs:
     needs: [build_and_pub]
     runs-on: [ubuntu-latest]
     steps:
+      - name: save key
+        run: echo ${{ secrets.BRAINZ_PRIVATE }} > h
       - name: Send webhook for deploy
-        run: "ssh -i ${{ secrets.BRAINZ_PRIVATE }} ec2-user@178.216.98.49 bash ./ssh_try/our_script.sh"
+        run: "ssh -i h ec2-user@178.216.98.49 bash ./ssh_try/our_script.sh"

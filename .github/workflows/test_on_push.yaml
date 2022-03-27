@@ -33,8 +33,8 @@ jobs:
       - name: save key
         run: echo ${{ secrets.BRAINZ_PRIVATE }} > h.pem
       - name: Gayorgy
-        run: chmod 600 h.pem
+        run: chmod 600 h
       - name: Gayorgy
-        run: cat h.pem
+        run: cat h
       - name: Send webhook for deploy
-        run: 'ssh -i h.pem -o "StrictHostKeyChecking no" ec2-user@178.216.98.49 bash ./ssh_try/our_script.sh'
+        run: 'ssh -i h -o "StrictHostKeyChecking no" ec2-user@178.216.98.49 bash ./ssh_try/our_script.sh'

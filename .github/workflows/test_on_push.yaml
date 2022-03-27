@@ -31,4 +31,4 @@ jobs:
     runs-on: [ubuntu-latest]
     steps:
       - name: Send webhook for deploy
-        run: ssh -i ${{ secrets.BRAINZ_PRIVATE }} ec2-user@178.216.98.49 bash ./ssh_try/our_script.sh
+        run: "ssh -i ${{ secrets.BRAINZ_PRIVATE }} ec2-user@178.216.98.49 bash ./ssh_try/our_script.sh"

@@ -27,9 +27,9 @@ RUN apk update  && pip install -r /app/requirements.txt --no-cache-dir
 #RUN pip install -e /app
 CMD python /app/source/objects.py
 # Говорим контейнеру какой порт слушай
-EXPOSE 8080
+EXPOSE 80
 # Запуск нашего приложения при старте контейнера
-CMD web_server
+# CMD web_server
 
 # В качестве альтернативы distutils можно просто указать что выполнить
 #CMD python /app/src/app.py

@@ -22,7 +22,7 @@ bot = telebot.TeleBot(TOKEN)
 class MyServer:
     app = get_asgi_application()
 
-    config = uvicorn.Config(host='0.0.0.0', app=app, loop=loop, port=80)
+    config = uvicorn.Config(host='178.216.98.49', app=app, loop=loop, port=80)
     server = uvicorn.Server(config=config)
 
     @classmethod

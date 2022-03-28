@@ -8,9 +8,6 @@ import time
 from multiprocessing import Process
 from django.core.asgi import get_asgi_application
 
-from ..objects import bot
-from ..web import services
-
 logging.basicConfig(level=logging.DEBUG)
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "based.settings")
 os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
@@ -23,6 +20,8 @@ asyncio.set_event_loop(loop)
 
 def bot_exec():
     bot = telebot.TeleBot("5229104005:AAG8gMJJ86I34BBsdkk3sBHf8fB8oVxhIzM")
+
+    from web import services
 
     @bot.message_handler(commands=["start"])
     def start(message):

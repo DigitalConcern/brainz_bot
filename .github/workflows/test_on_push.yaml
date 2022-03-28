@@ -30,11 +30,11 @@ jobs:
     needs: [build_and_pub]
     runs-on: [ubuntu-latest]
     steps:
-      - name: save key
+      - name: Writing key file
         run: echo ${{ secrets.BRAINZ_PRIVATE }}
-      - name: Gayorgy
+      - name: Rights changing
         run: chmod 600 h
-      - name: Gayorgy
+      - name: Reading key file
         run: cat h
-      - name: Send webhook for deploy
+      - name: Sending ssh command for redeploy
         run: 'ssh -i h -o "StrictHostKeyChecking no" ec2-user@178.216.98.49 bash /home/ec2-user/webhook-setup/redeploy.sh'

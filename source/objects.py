@@ -5,7 +5,6 @@ from multiprocessing import Process
 from django.core.asgi import get_asgi_application
 import uvicorn
 import telebot
-from bot.config import *
 import time
 
 logging.basicConfig(level=logging.DEBUG)
@@ -16,7 +15,7 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
-bot = telebot.TeleBot(TOKEN)
+bot = telebot.TeleBot("5229104005:AAG8gMJJ86I34BBsdkk3sBHf8fB8oVxhIzM")
 
 
 class MyServer:

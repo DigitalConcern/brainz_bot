@@ -16,11 +16,10 @@ os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
+bot = telebot.TeleBot("5229104005:AAG8gMJJ86I34BBsdkk3sBHf8fB8oVxhIzM")
 
 
 def bot_exec():
-    bot = telebot.TeleBot("5229104005:AAG8gMJJ86I34BBsdkk3sBHf8fB8oVxhIzM")
-
     from web import services
 
     @bot.message_handler(commands=["start"])

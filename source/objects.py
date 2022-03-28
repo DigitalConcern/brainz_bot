@@ -28,7 +28,7 @@ class MyServer:
     def run(cls):
         # asyncio.run(cls.on_startup())
         asyncio.run(cls.server.serve())
-        asyncio.run(cls.on_shutdown())
+        # asyncio.run(cls.on_shutdown())
 
     # @staticmethod
     # async def on_startup() -> None:
@@ -36,9 +36,9 @@ class MyServer:
     #
     #     await register_apps()
 
-    @staticmethod
-    async def on_shutdown() -> None:
-        pass
+    # @staticmethod
+    # async def on_shutdown() -> None:
+    #     pass
 
 
 def run_app():

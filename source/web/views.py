@@ -1,7 +1,7 @@
 from django.views.generic import TemplateView, CreateView
 from django.urls import reverse_lazy
 import asyncio
-from objects import bot
+from bot.main import bot
 from . import models
 from . import forms
 

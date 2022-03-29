@@ -84,7 +84,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'passwordbrainz',
-        'HOST': '0.0.0.0',
+        'HOST': '172.18.0.2',
         'PORT': '5432',
     }
 }

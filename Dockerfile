@@ -1,7 +1,7 @@
 # Берем нужный базовый образ
 FROM python:3.8-alpine
 
-RUN apk update && apk add --virtual build-deps gcc python3-dev musl-dev && apk add postgresql-dev
+RUN apk update && apk add --virtual build-deps gcc python3-dev musl-dev && apk add postgresql-dev && apk add bind-tools
 # Копируем все файлы из текущей директории в /app контейнера
 COPY . ./app
 # Устанавливаем все зависимости

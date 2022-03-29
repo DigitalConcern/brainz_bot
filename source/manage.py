@@ -20,9 +20,9 @@ def main():
         from objects import MyServer
         return MyServer.run()
 
-    elif "runbot" in sys.argv:
-        from objects import MyBot
-        return MyBot.run()
+    # elif "runbot" in sys.argv:
+    #     from objects import MyBot
+    #     return MyBot.run()
 
     elif "runapp" in sys.argv:
         from objects import run_app

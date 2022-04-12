@@ -89,8 +89,8 @@ async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogMa
         await bot.send_message(await ActiveUsers.filter(grade=grade).values_list("user_id", flat=True),
                                manager.current_context().dialog_data["post"])
     await bot.send_message(CHAT_ID, "Пост отправлен")
-    await manager.done()
-    await manager.bg().done()
+    await manager.close_manager()
+    await manager.bg().close_manager()
 
 
 # Обрабатываем сообщение о подтверждении ответа на вопрос
@@ -102,8 +102,8 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
     # Находим в бд кому отправить сообщение, после чего - отправляем
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
     await bot.send_message(CHAT_ID, "Ответ отправлен")
-    await manager.done()
-    await manager.bg().done()
+    await manager.close_manager()
+    await manager.bg().close_manager()
 
 # Корневой диалог админа
 root_admin_dialog = Dialog(

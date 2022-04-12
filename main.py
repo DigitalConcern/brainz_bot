@@ -1,6 +1,6 @@
 import asyncio
 from database import loop_db
-from bot import run_bot
+from bot_conf import run_bot
 
 
 async def main():

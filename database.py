@@ -40,11 +40,27 @@ class Questions(Model):
 # Инициализация базы данных
 async def run():
     await Tortoise.init(
-        # DB_TYPE :// USERNAME : PASSWORD @ HOST : PORT / DB_NAME
-        db_url="postgres://postgres:postgres@172.18.0.2:5432/postgres",
-        modules={
-            "models": ["database"]
-        })
+        config={
+            "connections": {
+                "default": {
+                    "engine": "tortoise.backends.asyncpg",
+                    "credentials": {
+                        "database": "postgres",
+                        "host": "172.18.0.2",
+                        "password": "postgres",
+                        "port": 5432,
+                        "user": "postgres"
+                    }
+                }
+            },
+            "apps": {
+                "models": {
+                    "models": ["database"],
+                    "default_connection": "default",
+                }
+            },
+        }
+    )
     await Tortoise.generate_schemas()
 
 

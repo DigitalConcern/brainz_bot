@@ -40,7 +40,8 @@ class Questions(Model):
 # Инициализация базы данных
 async def run():
     await Tortoise.init(
-        db_url="postgres://postgres:postgres@localhost:5432/postgres",
+        # DB_TYPE :// USERNAME : PASSWORD @ HOST : PORT / DB_NAME
+        db_url="postgres://postgres:postgres@172.18.0.2:5432/postgres",
         modules={
             "models": ["DB"]
         })

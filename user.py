@@ -1,5 +1,5 @@
 from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.types import Message, CallbackQuery
+from aiogram.types import Message, CallbackQuery, ParseMode
 
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto
@@ -131,6 +131,7 @@ usr_dialog = Dialog(
         Format("<b>{name}</b>, что тебя интересует?"),
         SwitchTo(Const("Задать вопрос ❓"), id="qu", state=UserSG.ask),
         # Сюда кнопки меню
+        parse_mode=ParseMode.HTML,
         getter=get_data,
         state=UserSG.menu
     ),

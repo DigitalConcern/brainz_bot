@@ -7,8 +7,9 @@ from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back
 from aiogram_dialog.widgets.text import Const, Format
 
-from config import *
-from database import *
+from database import ActiveUsers, Questions
+from bot import bot
+from config import Counter, NameCounter, CHAT_ID
 
 
 # Класс состояний пользователя
@@ -94,7 +95,6 @@ usr_dialog = Dialog(
     Window(
         Const("Greetings! Мы - КРОК, пройди пжж регистрацию"),
         SwitchTo(Const("Зарегистрироваться!"), id="fi", state=UserSG.name),
-        Back(Const("⏪ Назад в утробу")),
         state=UserSG.hi
     ),
     Window(

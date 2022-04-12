@@ -7,8 +7,9 @@ from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Select, Row, Back, Column, Start, Cancel
 from aiogram_dialog.widgets.text import Const, Format
 
-from config import bot, CHAT_ID
 from database import ActiveUsers, Questions
+from bot import bot
+from config import CHAT_ID
 
 # В данном файле находится интерфейс админа
 

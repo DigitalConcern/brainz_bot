@@ -1,3 +1,4 @@
+import asyncio
 from tortoise import Tortoise, fields
 from tortoise.models import Model
 
@@ -44,3 +45,8 @@ async def run():
             "models": ["DB"]
         })
     await Tortoise.generate_schemas()
+
+
+async def loop_db():
+    loop = asyncio.get_event_loop()
+    loop.create_task(run())

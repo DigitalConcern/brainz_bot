@@ -43,7 +43,7 @@ async def run():
         # DB_TYPE :// USERNAME : PASSWORD @ HOST : PORT / DB_NAME
         db_url="postgres://postgres:postgres@172.18.0.2:5432/postgres",
         modules={
-            "models": ["DB"]
+            "models": ["database"]
         })
     await Tortoise.generate_schemas()
 

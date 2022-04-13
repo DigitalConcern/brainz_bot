@@ -55,22 +55,20 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
 async def admin(m: Message, dialog_manager: DialogManager):
     await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
+
 MyBot.register_handler(method=admin, text="/admin", state="*")
 
 
-async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
-    # Находим в Бд все ключи вопросов и проверяем содержатся ли они в сообщении
-    for i in await Questions.filter().values_list("key",
-                                                  flat=True):
-        if m.text.find(str(i)) != -1:
-            # Заменяем ключ вопроса в сообщении ответа на пустую строку
-            manager.current_context().dialog_data["answer"] = m.text.replace(str(i), "")
-            # Записываем номер ключа (тикета) в данные состояния
-            manager.current_context().dialog_data["ticket"] = str(i)
-            await manager.dialog().switch_to(AnswerSG.check)
-            return
-    await MyBot.bot.send_message(m.chat.id, "Вопроса с таким номером не существует")
-    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+# Корневой диалог админа
+root_admin_dialog = Dialog(
+    Window(
+        Const("Hello, admin"),
+        Start(Const("I want to answer"), id="an", state=AnswerSG.answer),
+        Start(Const("I want to post"), id="po", state=PostSG.post),
+        state=AdminSG.admin
+    ),
+    launch_mode=LaunchMode.ROOT
+)
 
 
 async def post_handler(m: Message, dialog: Dialog, manager: DialogManager):
@@ -88,34 +86,11 @@ async def on_who_clicked(c: ChatEvent, select: Select, manager: DialogManager, i
 async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
     for grade in categories[manager.current_context().dialog_data["category"]]:
         await MyBot.bot.send_message(await ActiveUsers.filter(grade=grade).values_list("user_id", flat=True),
-                               manager.current_context().dialog_data["post"])
+                                     manager.current_context().dialog_data["post"])
     await MyBot.bot.send_message(CHAT_ID, "Пост отправлен")
     await manager.done()
     await manager.bg().done()
 
-
-# Обрабатываем сообщение о подтверждении ответа на вопрос
-async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
-    await MyBot.bot.send_message(
-        (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("user_id_id",
-                                                                                                 flat=True))[
-            0], manager.current_context().dialog_data["answer"])
-    # Находим в бд кому отправить сообщение, после чего - отправляем
-    await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
-    await MyBot.bot.send_message(CHAT_ID, "Ответ отправлен")
-    await manager.done()
-    await manager.bg().done()
-
-# Корневой диалог админа
-root_admin_dialog = Dialog(
-    Window(
-        Const("Hello, admin"),
-        Start(Const("I want to answer"), id="an", state=AnswerSG.answer),
-        Start(Const("I want to post"), id="po", state=PostSG.post),
-        state=AdminSG.admin
-    ),
-    launch_mode=LaunchMode.ROOT
-)
 
 # Ветка с постом
 post_dialog = Dialog(
@@ -154,6 +129,34 @@ post_dialog = Dialog(
     launch_mode=LaunchMode.SINGLE_TOP
 )
 
+
+async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
+    # Находим в Бд все ключи вопросов и проверяем содержатся ли они в сообщении
+    for i in await Questions.filter().values_list("key",
+                                                  flat=True):
+        if m.text.find(str(i)) != -1:
+            # Заменяем ключ вопроса в сообщении ответа на пустую строку
+            manager.current_context().dialog_data["answer"] = m.text.replace(str(i), "")
+            # Записываем номер ключа (тикета) в данные состояния
+            manager.current_context().dialog_data["ticket"] = str(i)
+            await manager.dialog().switch_to(AnswerSG.check)
+            return
+    await MyBot.bot.send_message(m.chat.id, "Вопроса с таким номером не существует")
+    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+
+
+# Обрабатываем сообщение о подтверждении ответа на вопрос
+async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
+    await MyBot.bot.send_message(
+        (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("user_id_id",
+                                                                                                 flat=True))[
+            0], manager.current_context().dialog_data["answer"])
+    # Находим в бд кому отправить сообщение, после чего - отправляем
+    await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
+    await MyBot.bot.send_message(CHAT_ID, "Ответ отправлен")
+    await manager.done()
+    await manager.bg().done()
+
 # Ветка с ответом на вопрос
 answer_dialog = Dialog(
     Window(
@@ -177,4 +180,5 @@ answer_dialog = Dialog(
     launch_mode=LaunchMode.SINGLE_TOP
 )
 
+# Регистрируем все диалоги
 MyBot.register_dialogs(root_admin_dialog, answer_dialog, post_dialog)

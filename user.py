@@ -44,6 +44,8 @@ async def start(m: Message, dialog_manager: DialogManager):
         dialog_manager.current_context().dialog_data["grade"] = \
             (await ActiveUsers.filter(user_id=m.from_user.id).values_list("grade"))[0]
 
+MyBot.register_handler(method=start, text="/start", state="*")
+
 
 # Если пользователь задал вопрос
 async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager):
@@ -146,3 +148,5 @@ usr_dialog = Dialog(
         state=UserSG.final
     )
 )
+
+MyBot.register_dialogs(usr_dialog)

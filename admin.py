@@ -13,7 +13,6 @@ from config import CHAT_ID
 
 # В данном файле находится интерфейс админа
 
-
 # Словарь категорий для обработки данных из таблицы активных пользователей
 categories = {
     "Всем": ["<7", "8", "9", "10", "11", "12"],
@@ -55,6 +54,8 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
 # Хендлер на команду /admin
 async def admin(m: Message, dialog_manager: DialogManager):
     await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+
+MyBot.register_handler(method=admin, text="/admin", state="*")
 
 
 async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
@@ -175,3 +176,5 @@ answer_dialog = Dialog(
     ),
     launch_mode=LaunchMode.SINGLE_TOP
 )
+
+MyBot.register_dialogs(root_admin_dialog, answer_dialog, post_dialog)

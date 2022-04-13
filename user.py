@@ -91,7 +91,7 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
 registration_dialog = Dialog(
     Window(
         Const("Greetings! Мы - КРОК, пройди пжж регистрацию"),
-        SwitchTo(Const("Зарегистрироваться!"), id="fi", state=UserSG.name),
+        SwitchTo(Const("Зарегистрироваться!"), id="fi", state=RegistrationSG.name),
         state=RegistrationSG.hi
     ),
     Window(
@@ -102,7 +102,7 @@ registration_dialog = Dialog(
     ),
     Window(
         Const("Ты школьник или студент?"),
-        SwitchTo(Const("Школьник"), id="school", state=UserSG.choose_grade),
+        SwitchTo(Const("Школьник"), id="school", state=RegistrationSG.choose_grade),
         Button(Const("Студент"), id="student", on_click=on_student_clicked),
         Back(Const("⏪ Назад")),
         state=RegistrationSG.grade

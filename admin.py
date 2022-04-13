@@ -8,7 +8,7 @@ from aiogram_dialog.widgets.kbd import Button, Select, Row, Back, Column, Start,
 from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions
-from bot import bot
+from bot import MyBot
 from config import CHAT_ID
 
 # В данном файле находится интерфейс админа
@@ -68,7 +68,7 @@ async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
             manager.current_context().dialog_data["ticket"] = str(i)
             await manager.dialog().switch_to(AnswerSG.check)
             return
-    await bot.send_message(m.chat.id, "Вопроса с таким номером не существует")
+    await MyBot.bot.send_message(m.chat.id, "Вопроса с таким номером не существует")
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
@@ -86,24 +86,24 @@ async def on_who_clicked(c: ChatEvent, select: Select, manager: DialogManager, i
 # Обрабатываем сообщение о подтверждении записи (поста)
 async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
     for grade in categories[manager.current_context().dialog_data["category"]]:
-        await bot.send_message(await ActiveUsers.filter(grade=grade).values_list("user_id", flat=True),
+        await MyBot.bot.send_message(await ActiveUsers.filter(grade=grade).values_list("user_id", flat=True),
                                manager.current_context().dialog_data["post"])
-    await bot.send_message(CHAT_ID, "Пост отправлен")
-    await manager.close_manager()
-    await manager.bg().close_manager()
+    await MyBot.bot.send_message(CHAT_ID, "Пост отправлен")
+    await manager.done()
+    await manager.bg().done()
 
 
 # Обрабатываем сообщение о подтверждении ответа на вопрос
 async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
-    await bot.send_message(
+    await MyBot.bot.send_message(
         (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("user_id_id",
                                                                                                  flat=True))[
             0], manager.current_context().dialog_data["answer"])
     # Находим в бд кому отправить сообщение, после чего - отправляем
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
-    await bot.send_message(CHAT_ID, "Ответ отправлен")
-    await manager.close_manager()
-    await manager.bg().close_manager()
+    await MyBot.bot.send_message(CHAT_ID, "Ответ отправлен")
+    await manager.done()
+    await manager.bg().done()
 
 # Корневой диалог админа
 root_admin_dialog = Dialog(

@@ -8,7 +8,7 @@ from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back
 from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions
-from bot import bot
+from bot import MyBot
 from config import Counter, NameCounter, CHAT_ID
 
 
@@ -51,7 +51,7 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
     name = (await ActiveUsers.filter(user_id=m.from_user.id).values_list("code_name", flat=True))[0]
     while await Questions.filter(key=count).values_list():
         count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
-    await bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name, parse_mode="HTML")
+    await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name, parse_mode="HTML")
     await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
     await manager.dialog().switch_to(UserSG.final)
 
@@ -72,7 +72,7 @@ async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogMa
                       user_name=manager.current_context().dialog_data["name"],
                       grade="12"
                       ).save()
-    await bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
+    await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
     await manager.dialog().switch_to(UserSG.menu)
 
 
@@ -87,7 +87,7 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
                       user_name=manager.current_context().dialog_data["name"],
                       grade=manager.current_context().dialog_data["grade"]
                       ).save()
-    await bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
+    await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
     await manager.dialog().switch_to(UserSG.menu)
 
 # Диалог с пользователем

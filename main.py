@@ -1,11 +1,11 @@
 import asyncio
 from database import loop_db
-from bot_conf import run_bot
+from bot import MyBot
 
 
 async def main():
     await loop_db()
-    await run_bot()
+    await MyBot.run_bot(MyBot.dp)
 
 if __name__ == '__main__':
     asyncio.run(main())

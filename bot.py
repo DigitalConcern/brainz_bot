@@ -15,7 +15,7 @@ class MyBot:
     storage = MemoryStorage()
     bot = Bot(token=API_TOKEN)
     dp = Dispatcher(bot, storage=storage)
-
+    registry = DialogRegistry(dp)
     @classmethod
     async def run_bot(cls):
         logging.basicConfig(level=logging.INFO)
@@ -27,6 +27,5 @@ class MyBot:
 
     @classmethod
     def register_dialogs(cls, *args):
-        registry = DialogRegistry(cls.dp)
         for dialog in args:
-            registry.register(dialog)
+            cls.registry.register(dialog)

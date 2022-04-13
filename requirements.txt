@@ -1,5 +1,5 @@
 aiogram==2.19
-aiogram-dialog==1.4.1
+aiogram-dialog
 aiohttp==3.8.1
 aiosignal==1.2.0
 aiosqlite==0.17.0

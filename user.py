@@ -12,12 +12,16 @@ from bot import MyBot
 from config import Counter, NameCounter, CHAT_ID
 
 
-# Класс состояний пользователя
-class UserSG(StatesGroup):
+# Класс состояний регистрации пользователя
+class RegistrationSG(StatesGroup):
     hi = State()
     name = State()
     grade = State()
     choose_grade = State()
+
+
+# Класс состояний пользователя
+class UserSG(StatesGroup):
     menu = State()
     ask = State()
     final = State()
@@ -33,7 +37,7 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
 
 async def start(m: Message, dialog_manager: DialogManager):
     if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
-        await dialog_manager.start(UserSG.hi, mode=StartMode.RESET_STACK)
+        await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
         # Если его нет в базе, то предлагаем зарегистрироваться
         dialog_manager.current_context().dialog_data["id"] = m.from_user.id
     else:
@@ -47,20 +51,9 @@ async def start(m: Message, dialog_manager: DialogManager):
 MyBot.register_handler(method=start, text="/start", state="*")
 
 
-# Если пользователь задал вопрос
-async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager):
-    count = Counter.get_count()
-    name = (await ActiveUsers.filter(user_id=m.from_user.id).values_list("code_name", flat=True))[0]
-    while await Questions.filter(key=count).values_list():
-        count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
-    await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name, parse_mode="HTML")
-    await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
-    await manager.dialog().switch_to(UserSG.final)
-
-
 async def name_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager):
     manager.current_context().dialog_data["name"] = m.text
-    await manager.dialog().switch_to(UserSG.grade)
+    await manager.dialog().switch_to(RegistrationSG.grade)
 
 
 # Если студент нажал кнопку "студент"
@@ -75,7 +68,8 @@ async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogMa
                       grade="12"
                       ).save()
     await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
-    await manager.dialog().switch_to(UserSG.menu)
+    await manager.done()
+    await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
 
 # Выбор класса обучения (для школьников)
@@ -90,27 +84,28 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
                       grade=manager.current_context().dialog_data["grade"]
                       ).save()
     await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
-    await manager.dialog().switch_to(UserSG.menu)
+    await manager.done()
+    await manager.start(UserSG.menu)
 
-# Диалог с пользователем
-usr_dialog = Dialog(
+# Диалог регистрации пользователя
+registration_dialog = Dialog(
     Window(
         Const("Greetings! Мы - КРОК, пройди пжж регистрацию"),
         SwitchTo(Const("Зарегистрироваться!"), id="fi", state=UserSG.name),
-        state=UserSG.hi
+        state=RegistrationSG.hi
     ),
     Window(
         Const("Как тебя зовут?"),
         MessageInput(name_handler),
         Back(Const("⏪ Назад")),
-        state=UserSG.name
+        state=RegistrationSG.name
     ),
     Window(
         Const("Ты школьник или студент?"),
         SwitchTo(Const("Школьник"), id="school", state=UserSG.choose_grade),
         Button(Const("Студент"), id="student", on_click=on_student_clicked),
         Back(Const("⏪ Назад")),
-        state=UserSG.grade
+        state=RegistrationSG.grade
     ),
     Window(
         Const("В каком ты классе?"),
@@ -127,8 +122,23 @@ usr_dialog = Dialog(
             id="grades",
             on_click=on_grade_clicked,
         )),
-        state=UserSG.choose_grade
-    ),
+        state=RegistrationSG.choose_grade
+    )
+)
+
+
+# Если пользователь задал вопрос
+async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager):
+    count = Counter.get_count()
+    name = (await ActiveUsers.filter(user_id=m.from_user.id).values_list("code_name", flat=True))[0]
+    while await Questions.filter(key=count).values_list():
+        count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
+    await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name, parse_mode="HTML")
+    await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
+    await manager.dialog().switch_to(UserSG.final)
+
+# Диалог юзера (уже зарегистрирован)
+user_dialog = Dialog(
     Window(
         Format("<b>{name}</b>, что тебя интересует?"),
         SwitchTo(Const("Задать вопрос ❓"), id="qu", state=UserSG.ask),
@@ -149,4 +159,4 @@ usr_dialog = Dialog(
     )
 )
 
-MyBot.register_dialogs(usr_dialog)
+MyBot.register_dialogs(registration_dialog, user_dialog)

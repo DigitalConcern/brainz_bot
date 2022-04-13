@@ -159,4 +159,5 @@ user_dialog = Dialog(
     )
 )
 
+# Регистрируем диалоги
 MyBot.register_dialogs(registration_dialog, user_dialog)

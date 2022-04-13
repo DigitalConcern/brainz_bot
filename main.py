@@ -1,7 +1,8 @@
 import asyncio
 from database import loop_db
 from bot import MyBot
-
+import admin
+import user
 
 async def main():
     await loop_db()

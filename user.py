@@ -197,7 +197,7 @@ async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManage
     # Реализовать через бд
     manager.current_context().dialog_data["choose_program"] = item_id
     manager.current_context().dialog_data["program_info"] = programs_list[item_id]
-
+    await manager.switch_to(ProgramsSG.program_info)
 
 # Диалог программ будет заполняться в зависимости от того, кто юзер (шк, студ)
 # На данный момент программы одинаковы для всех

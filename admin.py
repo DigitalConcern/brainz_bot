@@ -53,8 +53,8 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
 
 # Хендлер на команду /admin
 async def admin(m: Message, dialog_manager: DialogManager):
-    await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
     await MyBot.bot.send_message(m.from_user.id, "Hello, admin!")
+    await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
 MyBot.register_handler(method=admin, text="/admin", state="*")

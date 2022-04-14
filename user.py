@@ -9,7 +9,7 @@ from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions
 from bot import MyBot
-from config import Counter, NameCounter, CHAT_ID, programs
+from config import Counter, NameCounter, CHAT_ID, programs_list
 
 
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
@@ -189,14 +189,14 @@ user_menu_dialog = Dialog(
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     return {
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
-        'info': dialog_manager.current_context().dialog_data.get("info", None)
+        'program_info': dialog_manager.current_context().dialog_data.get("program_info", None)
     }
 
 
 async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
     # Реализовать через бд
     manager.current_context().dialog_data["choose_program"] = item_id
-    manager.current_context().dialog_data["info"] = programs[item_id]
+    manager.current_context().dialog_data["program_info"] = programs_list[item_id]
 
 
 # Диалог программ будет заполняться в зависимости от того, кто юзер (шк, студ)
@@ -225,7 +225,7 @@ programs = Dialog(
                "<b>КЛИКАЙ НА КНОПКИ чтобы узнать подробнее</b>"),
         Row(Select(
             Format("{item}"),
-            items=list(programs.keys()),
+            items=list(programs_list.keys()),
             item_id_getter=lambda x: x,
             id="grades",
             on_click=on_program_clicked
@@ -236,7 +236,7 @@ programs = Dialog(
         state=ProgramsSG.choose_program
     ),
     Window(
-        Format('{info}'),
+        Format('{program_info}'),
         Back(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,

@@ -230,7 +230,7 @@ programs = Dialog(
                "<b>КЛИКАЙ НА КНОПКИ чтобы узнать подробнее</b>"),
         Row(Select(
             Format("{item}"),
-            items=[list(programs.keys())],
+            items=list(programs.keys()),
             item_id_getter=lambda x: x,
             id="grades",
             on_click=on_program_clicked

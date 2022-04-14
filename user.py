@@ -125,14 +125,19 @@ registration_dialog = Dialog(
 # Класс состояний пользователя
 class UserSG(StatesGroup):
     menu = State()
-    faq = State()
-    ask = State()
 
 
 # Класс состояний программ
 class ProgramsSG(StatesGroup):
     choose_program = State()
     program_info = State()
+
+
+# Класс состояний диалога вопросов
+class QuestionsSG(StatesGroup):
+    choose = State()
+    faq = State()
+    ask = State()
 
 
 # функция для получения данных из состояний
@@ -142,6 +147,23 @@ async def get_data_user(dialog_manager: DialogManager, **kwargs):
         'name': dialog_manager.current_context().dialog_data.get("name", None),
         'grade': dialog_manager.current_context().dialog_data.get("grade", None),
     }
+
+
+# Диалог юзера (уже зарегистрирован)
+user_menu_dialog = Dialog(
+    Window(
+        Format("Что тебя интересует?"),
+        # Я думал сделать два диалога для шк и студ, но это тупо, поэтому нужно подумать как на этом этапе выгрузить
+        # из бд текст для шк и студов по отдельности
+        Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG.choose_program),
+        Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG.choose_program),
+        Start(Const("Задать вопрос ❓"), id="qu", state=QuestionsSG.choose),
+        parse_mode=ParseMode.HTML,
+        # getter=get_data_user,
+        state=UserSG.menu
+    ),
+    launch_mode=LaunchMode.ROOT
+)
 
 
 # Если пользователь задал вопрос
@@ -155,33 +177,30 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
     await MyBot.bot.send_message(m.from_user.id, 'Вопрос отправлен!')
     await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
-
-# Диалог юзера (уже зарегистрирован)
-user_menu_dialog = Dialog(
+# Диалог с вопросами
+question_dialog = Dialog(
     Window(
-        Format("Что тебя интересует?"),
-        # Я думал сделать два диалога для шк и студ, но это тупо, поэтому нужно подумать как на этом этапе выгрузить
-        # из бд текст для шк и студов по отдельности
-        Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG.choose_program),
-        Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG.choose_program),
-        SwitchTo(Const("Часто задаваемые вопросы 📍"), id="FAQ", state=UserSG.faq),
-        SwitchTo(Const("Задать вопрос ❓"), id="qu", state=UserSG.ask),
+        Format("Проверь список ответов и вопросов!\n"
+               "Возможно, на твой вопрос уже есть <b>ответ!</b>"),
+        SwitchTo(Const("Задать вопрос эксперту"), id="ask", state=QuestionsSG.ask),
+        SwitchTo(Const("Ответы на частые вопросы"), id="faq", state=QuestionsSG.faq),
+        Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,
-        # getter=get_data_user,
-        state=UserSG.menu
+        state=QuestionsSG.choose
+
     ),
     Window(
-        Const("Здесь будут часто задаваемые вопросы!"),
+        Const("Здесь будут часто ответы на часто задаваемые вопросы!"),
         Back(Const("⏪ Назад")),
-        state=UserSG.faq
+        state=QuestionsSG.faq
     ),
     Window(
         Const("Введите вопрос"),
         MessageInput(quest_handler),
         Back(Const("⏪ Назад")),
-        state=UserSG.ask
+        state=QuestionsSG.ask
     ),
-    launch_mode=LaunchMode.ROOT
+    launch_mode=LaunchMode.SINGLE_TOP
 )
 
 
@@ -202,7 +221,7 @@ async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManage
 # Диалог программ будет заполняться в зависимости от того, кто юзер (шк, студ)
 # На данный момент программы одинаковы для всех
 # Так как через словарь сделать не получается, нужно через бд, где будет столбец для кого программа
-programs = Dialog(
+programs_dialog = Dialog(
     Window(
         Format("<b>1. Летняя ИТ-школа КРОК</b>\n"
                "Бесплатный интенсив по погружению в одну из ИТ-профессий:"
@@ -246,4 +265,4 @@ programs = Dialog(
 )
 
 # Регистрируем диалоги
-MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs)
+MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog, question_dialog)

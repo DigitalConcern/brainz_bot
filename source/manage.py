@@ -16,6 +16,7 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
 
+
     if "runserver" in sys.argv:
         from objects import MyServer
         return MyServer.run()

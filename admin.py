@@ -54,6 +54,7 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
 # Хендлер на команду /admin
 async def admin(m: Message, dialog_manager: DialogManager):
     await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+    await MyBot.bot.send_message(m.from_user.id, "Hello, admin!")
 
 
 MyBot.register_handler(method=admin, text="/admin", state="*")
@@ -62,7 +63,6 @@ MyBot.register_handler(method=admin, text="/admin", state="*")
 # Корневой диалог админа
 root_admin_dialog = Dialog(
     Window(
-        Const("Hello, admin"),
         Start(Const("I want to answer"), id="an", state=AnswerSG.answer),
         Start(Const("I want to post"), id="po", state=PostSG.post),
         state=AdminSG.admin
@@ -89,7 +89,7 @@ async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogMa
                                      manager.current_context().dialog_data["post"])
     await MyBot.bot.send_message(CHAT_ID, "Пост отправлен")
     await manager.done()
-    await manager.bg().done()
+    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
 # Ветка с постом
@@ -142,6 +142,7 @@ async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
             await manager.dialog().switch_to(AnswerSG.check)
             return
     await MyBot.bot.send_message(m.chat.id, "Вопроса с таким номером не существует")
+    await manager.done()
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
@@ -155,7 +156,7 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
     await MyBot.bot.send_message(CHAT_ID, "Ответ отправлен")
     await manager.done()
-    await manager.bg().done()
+    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 # Ветка с ответом на вопрос
 answer_dialog = Dialog(

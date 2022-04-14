@@ -2,14 +2,14 @@ from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, ParseMode
 
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
-from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto
+from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto, LaunchMode
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back
+from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start
 from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions
 from bot import MyBot
-from config import Counter, NameCounter, CHAT_ID
+from config import Counter, NameCounter, CHAT_ID, programs
 
 
 # Класс состояний регистрации пользователя
@@ -20,34 +20,20 @@ class RegistrationSG(StatesGroup):
     choose_grade = State()
 
 
-# Класс состояний пользователя
-class UserSG(StatesGroup):
-    menu = State()
-    ask = State()
-    final = State()
-
-
-async def get_data(dialog_manager: DialogManager, **kwargs):
-    return {
-        'id': dialog_manager.current_context().dialog_data.get("id", None),
-        'name': dialog_manager.current_context().dialog_data.get("name", None),
-        'grade': dialog_manager.current_context().dialog_data.get("grade", None),
-    }
-
-
 async def start(m: Message, dialog_manager: DialogManager):
     if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
         await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
         # Если его нет в базе, то предлагаем зарегистрироваться
         dialog_manager.current_context().dialog_data["id"] = m.from_user.id
     else:
-        await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
-        # Если он есть то переходим в меню
         dialog_manager.current_context().dialog_data["name"] = \
             (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]
         dialog_manager.current_context().dialog_data["grade"] = \
             (await ActiveUsers.filter(user_id=m.from_user.id).values_list("grade"))[0]
+        # Если он есть то переходим в меню
+        await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
+# Регистрируем хэндлер start
 MyBot.register_handler(method=start, text="/start", state="*")
 
 
@@ -127,6 +113,29 @@ registration_dialog = Dialog(
 )
 
 
+# Класс состояний пользователя
+class UserSG(StatesGroup):
+    menu = State()
+    faq = State()
+    ask = State()
+    ask_final = State()
+
+
+# Класс состояний программ
+class ProgramsSG(StatesGroup):
+    choose_program = State()
+    program_info = State()
+
+
+# функция для получения данных из состояний
+async def get_data_user(dialog_manager: DialogManager, **kwargs):
+    return {
+        'id': dialog_manager.current_context().dialog_data.get("id", None),
+        'name': dialog_manager.current_context().dialog_data.get("name", None),
+        'grade': dialog_manager.current_context().dialog_data.get("grade", None),
+    }
+
+
 # Если пользователь задал вопрос
 async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager):
     count = Counter.get_count()
@@ -135,17 +144,27 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
         count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
     await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name, parse_mode="HTML")
     await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
-    await manager.dialog().switch_to(UserSG.final)
+    await manager.dialog().switch_to(UserSG.ask_final)
+    await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
 # Диалог юзера (уже зарегистрирован)
-user_dialog = Dialog(
+user_menu_dialog = Dialog(
     Window(
-        Format("<b>{name}</b>, что тебя интересует?"),
+        Format("Привет, <b>{name}</b>\nЧто тебя интересует?"),
+        # Я думал сделать два диалога для шк и студ, но это тупо, поэтому нужно подумать как на этом этапе выгрузить
+        # из бд текст для шк и студов по отдельности
+        Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG.choose_program),
+        Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG.choose_program),
+        SwitchTo(Const("Часто задаваемые вопросы 📍"), id="FAQ", state=UserSG.faq),
         SwitchTo(Const("Задать вопрос ❓"), id="qu", state=UserSG.ask),
-        # Сюда кнопки меню
         parse_mode=ParseMode.HTML,
-        getter=get_data,
+        getter=get_data_user,
         state=UserSG.menu
+    ),
+    Window(
+        Const("Здесь будут часто задаваемые вопросы!"),
+        Back(Const("⏪ Назад")),
+        state=UserSG.faq
     ),
     Window(
         Const("Введите вопрос"),
@@ -155,9 +174,69 @@ user_dialog = Dialog(
     ),
     Window(
         Const('Вопрос отправлен!'),
-        state=UserSG.final
-    )
+        state=UserSG.ask_final
+    ),
+    launch_mode=LaunchMode.ROOT
+)
+
+
+# функция для получения данных из состояний
+async def get_data_programs(dialog_manager: DialogManager, **kwargs):
+    return {
+        'choose_program': dialog_manager.current_context().dialog_data.get("program_info", None),
+        'program_info': dialog_manager.current_context().dialog_data.get("program_info", None)
+    }
+
+
+async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
+    # Реализовать через бд
+    manager.current_context().dialog_data["choose_program"] = item_id
+    manager.current_context().dialog_data["program_info"] = programs[item_id]
+
+# Диалог программ будет заполняться в зависимости от того, кто юзер (шк, студ)
+# На данный момент программы одинаковы для всех
+# Так как через словарь сделать не получается, нужно через бд, где будет столбец для кого программа
+programs = Dialog(
+    Window(
+        Format("<b>1. Летняя ИТ-школа КРОК</b>\n"
+               "Бесплатный интенсив по погружению в одну из ИТ-профессий:"
+               " от разработки и аналитики до маркетинга и продаж.\n"
+               "В 2021 году студенты прошли обучение по 10 направлениям!\n\n"
+               "<b>2. Лидерская программа</b>\n"
+               "Это сообщество предприимчивых студентов. Мы даем возможности для прокачки,"
+               " знакомим с экспертами из бизнеса и помогаем реализовывать инициативы в своем вузе.\n\n"
+               "<b>3. Разработка приложений на языке С#</b>\n"
+               "ПРАКТИЧЕСКИЙ КУРС ОТ КРОК\n"
+               "Ты на практике разберешься в архитектуре приложений,"
+               " погрузишься в особенности программирования на C#"
+               " и создашь собственное приложение на Microsoft.NET Framework\n\n"
+               "<b>4. ВВЕДЕНИЕ В ЯЗЫК JAVA И ПЛАТФОРМУ РАЗРАБОТКИ</b>\n"
+               "Самые передовые практики и современные инструменты в мире корпоративной разработки на Java."
+               " Эксперты и инженеры-практики по разработке и архитектуре ПО\n\n"
+               "<b>5. Кейс-лаборатория КРОК</b>\n"
+               "Закрой практику в университете, решая кейс под реальный бизнес-запрос. "
+               "Тебя ждут 12 недель командной работы под руководством наставников\n\n"
+               "<b>КЛИКАЙ НА КНОПКИ чтобы узнать подробнее</b>"),
+        Row(Select(
+            Format("{item}"),
+            items=[programs.keys()],
+            item_id_getter=lambda x: x,
+            id="grades",
+            on_click=on_program_clicked
+        )),
+        getter=get_data_programs,
+        parse_mode=ParseMode.HTML,
+        state=ProgramsSG.choose_program
+    ),
+    Window(
+        Format('{program_info}'),
+        Back(Const("⏪ Назад")),
+        getter=get_data_programs,
+        parse_mode=ParseMode.HTML,
+        state=ProgramsSG.program_info
+    ),
+    launch_mode=LaunchMode.SINGLE_TOP
 )
 
 # Регистрируем диалоги
-MyBot.register_dialogs(registration_dialog, user_dialog)
+MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs)

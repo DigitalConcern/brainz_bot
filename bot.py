@@ -5,17 +5,12 @@ from aiogram_dialog import DialogRegistry
 from config import API_TOKEN
 
 
-# logging.basicConfig(level=logging.INFO)
-# storage = MemoryStorage()
-# bot = Bot(token=API_TOKEN)
-# dp = Dispatcher(bot, storage=storage)
-
-
 class MyBot:
     storage = MemoryStorage()
     bot = Bot(token=API_TOKEN)
     dp = Dispatcher(bot, storage=storage)
     registry = DialogRegistry(dp)
+
     @classmethod
     async def run_bot(cls):
         logging.basicConfig(level=logging.INFO)

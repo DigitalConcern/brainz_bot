@@ -11,6 +11,9 @@ from database import ActiveUsers, Questions
 from bot import MyBot
 from config import Counter, NameCounter, CHAT_ID, programs
 
+# PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
+# список админов и инфу про программы
+
 
 # Класс состояний регистрации пользователя
 class RegistrationSG(StatesGroup):
@@ -26,12 +29,15 @@ async def start(m: Message, dialog_manager: DialogManager):
         # Если его нет в базе, то предлагаем зарегистрироваться
         dialog_manager.current_context().dialog_data["id"] = m.from_user.id
     else:
+        # Если он есть то переходим в меню
+        await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
+        MyBot.bot.send_message(m.from_user.id, f'Привет, '
+                                               f'<b>{(await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]}!</b>',
+                               parse_mode="HTML")
         dialog_manager.current_context().dialog_data["name"] = \
             (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]
         dialog_manager.current_context().dialog_data["grade"] = \
             (await ActiveUsers.filter(user_id=m.from_user.id).values_list("grade"))[0]
-        # Если он есть то переходим в меню
-        await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
 # Регистрируем хэндлер start
 MyBot.register_handler(method=start, text="/start", state="*")
@@ -150,7 +156,7 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
 # Диалог юзера (уже зарегистрирован)
 user_menu_dialog = Dialog(
     Window(
-        Format("Привет, <b>{name}</b>\nЧто тебя интересует?"),
+        Format("Что тебя интересует?"),
         # Я думал сделать два диалога для шк и студ, но это тупо, поэтому нужно подумать как на этом этапе выгрузить
         # из бд текст для шк и студов по отдельности
         Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG.choose_program),

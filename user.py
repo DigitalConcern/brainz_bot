@@ -189,7 +189,7 @@ user_menu_dialog = Dialog(
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     return {
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
-        'info': dialog_manager.current_context().dialog_data.get("program_info", None)
+        'info': dialog_manager.current_context().dialog_data.get("info", None)
     }
 
 

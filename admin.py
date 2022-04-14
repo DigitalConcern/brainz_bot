@@ -63,8 +63,9 @@ MyBot.register_handler(method=admin, text="/admin", state="*")
 # Корневой диалог админа
 root_admin_dialog = Dialog(
     Window(
-        Start(Const("I want to answer"), id="an", state=AnswerSG.answer),
-        Start(Const("I want to post"), id="po", state=PostSG.post),
+        Const("Выбери действие 🤔"),
+        Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
+        Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
         state=AdminSG.admin
     ),
     launch_mode=LaunchMode.ROOT
@@ -95,7 +96,7 @@ async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogMa
 # Ветка с постом
 post_dialog = Dialog(
     Window(
-        Const("Please, send post"),
+        Const("Пожалуйста, напишите текст поста"),
         MessageInput(post_handler),
         Cancel(Const("⏪ Назад")),
         state=PostSG.post
@@ -161,7 +162,7 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
 # Ветка с ответом на вопрос
 answer_dialog = Dialog(
     Window(
-        Const("Please, answer"),
+        Const("Пожалуйста, напишите текст ответа на вопрос"),
         MessageInput(answer_handler),
         Cancel(Const("⏪ Назад")),
         state=AnswerSG.answer

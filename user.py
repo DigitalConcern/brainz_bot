@@ -11,6 +11,7 @@ from database import ActiveUsers, Questions
 from bot import MyBot
 from config import Counter, NameCounter, CHAT_ID, programs
 
+
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
 # список админов и инфу про программы
 
@@ -29,15 +30,16 @@ async def start(m: Message, dialog_manager: DialogManager):
         # Если его нет в базе, то предлагаем зарегистрироваться
         dialog_manager.current_context().dialog_data["id"] = m.from_user.id
     else:
+        await MyBot.bot.send_message(m.from_user.id, f'Привет, '
+                                                     f'<b>{(await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]}!</b>',
+                                     parse_mode="HTML")
         # Если он есть то переходим в меню
-        MyBot.bot.send_message(m.from_user.id, f'Привет, '
-                                               f'<b>{(await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]}!</b>',
-                               parse_mode="HTML")
         await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
         dialog_manager.current_context().dialog_data["name"] = \
             (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]
         dialog_manager.current_context().dialog_data["grade"] = \
             (await ActiveUsers.filter(user_id=m.from_user.id).values_list("grade"))[0]
+
 
 # Регистрируем хэндлер start
 MyBot.register_handler(method=start, text="/start", state="*")
@@ -78,6 +80,7 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
     await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
     await manager.done()
     await manager.start(UserSG.menu)
+
 
 # Диалог регистрации пользователя
 registration_dialog = Dialog(
@@ -153,6 +156,7 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
     await manager.dialog().switch_to(UserSG.ask_final)
     await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
+
 # Диалог юзера (уже зарегистрирован)
 user_menu_dialog = Dialog(
     Window(
@@ -198,6 +202,7 @@ async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManage
     # Реализовать через бд
     manager.current_context().dialog_data["choose_program"] = item_id
     manager.current_context().dialog_data["program_info"] = programs[item_id]
+
 
 # Диалог программ будет заполняться в зависимости от того, кто юзер (шк, студ)
 # На данный момент программы одинаковы для всех

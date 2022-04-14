@@ -4,7 +4,7 @@ from aiogram.types import Message, CallbackQuery, ParseMode
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
 from aiogram_dialog.manager.protocols import LaunchMode
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Select, Row, Back, Column, Start, Cancel
+from aiogram_dialog.widgets.kbd import Button, Select, Back, Column, Start, Cancel
 from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions
@@ -53,7 +53,7 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
 
 # Хендлер на команду /admin
 async def admin(m: Message, dialog_manager: DialogManager):
-    await MyBot.bot.send_message(m.from_user.id, "Hello, admin!")
+    await MyBot.bot.send_message(m.chat.id, "Hello, admin!")
     await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
@@ -151,8 +151,8 @@ async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
 async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
     await MyBot.bot.send_message(
         (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("user_id_id",
-                                                                                                 flat=True))[
-            0], manager.current_context().dialog_data["answer"])
+                                                                                                 flat=True))[0],
+        manager.current_context().dialog_data["answer"])
     # Находим в бд кому отправить сообщение, после чего - отправляем
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
     await MyBot.bot.send_message(CHAT_ID, "Ответ отправлен")

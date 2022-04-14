@@ -102,7 +102,7 @@ post_dialog = Dialog(
     ),
     Window(
         Const("Кому отправить?"),
-        Row(Select(
+        Column(Select(
             Format("{item}"),
             items=["Школьникам",
                    "Студентам",

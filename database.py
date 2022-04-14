@@ -37,6 +37,15 @@ class Questions(Model):
         table = "questions"
 
 
+class Programs(Model):
+    key = fields.IntField(pk=True)
+    question = fields.TextField()
+    # is_active = fields.BooleanField()
+
+    class Meta:
+        table = "programs_student"
+
+
 # Инициализация базы данных
 async def run():
     await Tortoise.init(

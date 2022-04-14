@@ -113,7 +113,7 @@ post_dialog = Dialog(
             id="grades",
             on_click=on_who_clicked,
         )),
-        Cancel(Const("⏪ Назад")),
+        Back(Const("⏪ Назад")),
         state=PostSG.to_who
     ),
     Window(

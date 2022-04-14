@@ -4,7 +4,7 @@ from aiogram.types import Message, CallbackQuery, ParseMode
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto, LaunchMode
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start
+from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel
 from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions
@@ -31,7 +31,7 @@ async def start(m: Message, dialog_manager: DialogManager):
         dialog_manager.current_context().dialog_data["id"] = m.from_user.id
     else:
         await MyBot.bot.send_message(m.from_user.id, f'Привет, '
-                                                     f'<b>{(await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]}!</b>',
+                                                     f'<b>{"".join((await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0])}!</b>',
                                      parse_mode="HTML")
         # Если он есть то переходим в меню
         await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
@@ -230,11 +230,12 @@ programs = Dialog(
                "<b>КЛИКАЙ НА КНОПКИ чтобы узнать подробнее</b>"),
         Row(Select(
             Format("{item}"),
-            items=[programs.keys()],
+            items=[list(programs.keys())],
             item_id_getter=lambda x: x,
             id="grades",
             on_click=on_program_clicked
         )),
+        Cancel(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
         state=ProgramsSG.choose_program

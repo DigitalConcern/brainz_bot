@@ -127,7 +127,6 @@ class UserSG(StatesGroup):
     menu = State()
     faq = State()
     ask = State()
-    ask_final = State()
 
 
 # Класс состояний программ
@@ -153,7 +152,7 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
         count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
     await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name, parse_mode="HTML")
     await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
-    await manager.dialog().switch_to(UserSG.ask_final)
+    await MyBot.bot.send_message(m.from_user.id, 'Вопрос отправлен!')
     await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
 
@@ -182,10 +181,6 @@ user_menu_dialog = Dialog(
         Back(Const("⏪ Назад")),
         state=UserSG.ask
     ),
-    Window(
-        Const('Вопрос отправлен!'),
-        state=UserSG.ask_final
-    ),
     launch_mode=LaunchMode.ROOT
 )
 
@@ -193,7 +188,7 @@ user_menu_dialog = Dialog(
 # функция для получения данных из состояний
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     return {
-        'choose_program': dialog_manager.current_context().dialog_data.get("program_info", None),
+        'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
         'program_info': dialog_manager.current_context().dialog_data.get("program_info", None)
     }
 

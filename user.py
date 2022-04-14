@@ -191,13 +191,13 @@ question_dialog = Dialog(
     ),
     Window(
         Const("Здесь будут часто ответы на часто задаваемые вопросы!"),
-        Back(Const("⏪ Назад")),
+        SwitchTo(Const("⏪ Назад"), id="smrt_back_faq", state=QuestionsSG.choose),
         state=QuestionsSG.faq
     ),
     Window(
         Const("Введите вопрос"),
         MessageInput(quest_handler),
-        Back(Const("⏪ Назад")),
+        SwitchTo(Const("⏪ Назад"), id="smrt_back_ask", state=QuestionsSG.choose),
         state=QuestionsSG.ask
     ),
     launch_mode=LaunchMode.SINGLE_TOP

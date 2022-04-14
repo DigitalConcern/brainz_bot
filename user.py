@@ -30,10 +30,10 @@ async def start(m: Message, dialog_manager: DialogManager):
         dialog_manager.current_context().dialog_data["id"] = m.from_user.id
     else:
         # Если он есть то переходим в меню
-        await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
         MyBot.bot.send_message(m.from_user.id, f'Привет, '
                                                f'<b>{(await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]}!</b>',
                                parse_mode="HTML")
+        await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
         dialog_manager.current_context().dialog_data["name"] = \
             (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]
         dialog_manager.current_context().dialog_data["grade"] = \

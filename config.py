@@ -4,7 +4,7 @@ API_TOKEN = "5176288897:AAFWal8jXz6Z4SKPJYf4MNsxc5tRskDQRYY"
 CHAT_ID = "-721759162"
 
 # Пока программы не достаются из базы
-programs = {
+programs_list = {
     "1": "Программа 1",
     "2": "Программа 2",
     "3": "Программа 3",

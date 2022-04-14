@@ -167,7 +167,7 @@ user_menu_dialog = Dialog(
         SwitchTo(Const("Часто задаваемые вопросы 📍"), id="FAQ", state=UserSG.faq),
         SwitchTo(Const("Задать вопрос ❓"), id="qu", state=UserSG.ask),
         parse_mode=ParseMode.HTML,
-        getter=get_data_user,
+        # getter=get_data_user,
         state=UserSG.menu
     ),
     Window(
@@ -189,14 +189,14 @@ user_menu_dialog = Dialog(
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     return {
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
-        'program_info': dialog_manager.current_context().dialog_data.get("program_info", None)
+        'info': dialog_manager.current_context().dialog_data.get("program_info", None)
     }
 
 
 async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
     # Реализовать через бд
     manager.current_context().dialog_data["choose_program"] = item_id
-    manager.current_context().dialog_data["program_info"] = programs[item_id]
+    manager.current_context().dialog_data["info"] = programs[item_id]
 
 
 # Диалог программ будет заполняться в зависимости от того, кто юзер (шк, студ)
@@ -231,12 +231,12 @@ programs = Dialog(
             on_click=on_program_clicked
         )),
         Cancel(Const("⏪ Назад")),
-        getter=get_data_programs,
+        # getter=get_data_programs,
         parse_mode=ParseMode.HTML,
         state=ProgramsSG.choose_program
     ),
     Window(
-        Format('{program_info}'),
+        Format('{info}'),
         Back(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,

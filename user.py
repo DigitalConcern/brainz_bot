@@ -7,9 +7,17 @@ from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel
 from aiogram_dialog.widgets.text import Const, Format
 
-from database import ActiveUsers, Questions
+from database import ActiveUsers, Questions, Programs
 from bot import MyBot
 from config import Counter, NameCounter, CHAT_ID, programs_list
+
+
+class keys():
+    KEYS = []
+
+    @classmethod
+    async def run_keys(cls):
+        cls.KEYS = await Programs.filter().values_list("key", flat=True)
 
 
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
@@ -25,6 +33,14 @@ class RegistrationSG(StatesGroup):
 
 
 async def start(m: Message, dialog_manager: DialogManager):
+    # await Programs(key=1,
+    #                text="<b>1. Летняя ИТ-школа КРОК</b>\n"
+    #                     "Бесплатный интенсив по погружению в одну из ИТ-профессий:"
+    #                     " от разработки и аналитики до маркетинга и продаж.\n"
+    #                     "В 2021 году студенты прошли обучение по 10 направлениям!\n\n",
+    #                is_student="All"
+    #                ).save()
+    await keys.run_keys()
     if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
         await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
         # Если его нет в базе, то предлагаем зарегистрироваться
@@ -177,6 +193,7 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
     await MyBot.bot.send_message(m.from_user.id, 'Вопрос отправлен!')
     await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
+
 # Диалог с вопросами
 question_dialog = Dialog(
     Window(
@@ -208,7 +225,9 @@ question_dialog = Dialog(
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     return {
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
-        'program_info': dialog_manager.current_context().dialog_data.get("program_info", None)
+        'program_info': dialog_manager.current_context().dialog_data.get("program_info", None),
+        'keys': await Programs.filter().values_list("key", flat=True)
+
     }
 
 
@@ -218,33 +237,16 @@ async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManage
     manager.current_context().dialog_data["program_info"] = programs_list[item_id]
     await manager.switch_to(ProgramsSG.program_info)
 
+
 # Диалог программ будет заполняться в зависимости от того, кто юзер (шк, студ)
 # На данный момент программы одинаковы для всех
 # Так как через словарь сделать не получается, нужно через бд, где будет столбец для кого программа
 programs_dialog = Dialog(
     Window(
-        Format("<b>1. Летняя ИТ-школа КРОК</b>\n"
-               "Бесплатный интенсив по погружению в одну из ИТ-профессий:"
-               " от разработки и аналитики до маркетинга и продаж.\n"
-               "В 2021 году студенты прошли обучение по 10 направлениям!\n\n"
-               "<b>2. Лидерская программа</b>\n"
-               "Это сообщество предприимчивых студентов. Мы даем возможности для прокачки,"
-               " знакомим с экспертами из бизнеса и помогаем реализовывать инициативы в своем вузе.\n\n"
-               "<b>3. Разработка приложений на языке С#</b>\n"
-               "ПРАКТИЧЕСКИЙ КУРС ОТ КРОК\n"
-               "Ты на практике разберешься в архитектуре приложений,"
-               " погрузишься в особенности программирования на C#"
-               " и создашь собственное приложение на Microsoft.NET Framework\n\n"
-               "<b>4. ВВЕДЕНИЕ В ЯЗЫК JAVA И ПЛАТФОРМУ РАЗРАБОТКИ</b>\n"
-               "Самые передовые практики и современные инструменты в мире корпоративной разработки на Java."
-               " Эксперты и инженеры-практики по разработке и архитектуре ПО\n\n"
-               "<b>5. Кейс-лаборатория КРОК</b>\n"
-               "Закрой практику в университете, решая кейс под реальный бизнес-запрос. "
-               "Тебя ждут 12 недель командной работы под руководством наставников\n\n"
-               "<b>КЛИКАЙ НА КНОПКИ чтобы узнать подробнее</b>"),
+        Format("Fuck"),
         Row(Select(
             Format("{item}"),
-            items=list(programs_list.keys()),
+            items=list("{keys}"),
             item_id_getter=lambda x: x,
             id="grades",
             on_click=on_program_clicked
@@ -266,3 +268,23 @@ programs_dialog = Dialog(
 
 # Регистрируем диалоги
 MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog, question_dialog)
+
+#                "<b>1. Летняя ИТ-школа КРОК</b>\n"
+#                "Бесплатный интенсив по погружению в одну из ИТ-профессий:"
+#                " от разработки и аналитики до маркетинга и продаж.\n"
+#                "В 2021 году студенты прошли обучение по 10 направлениям!\n\n"
+#                "<b>2. Лидерская программа</b>\n"
+#                "Это сообщество предприимчивых студентов. Мы даем возможности для прокачки,"
+#                " знакомим с экспертами из бизнеса и помогаем реализовывать инициативы в своем вузе.\n\n"
+#                "<b>3. Разработка приложений на языке С#</b>\n"
+#                "ПРАКТИЧЕСКИЙ КУРС ОТ КРОК\n"
+#                "Ты на практике разберешься в архитектуре приложений,"
+#                " погрузишься в особенности программирования на C#"
+#                " и создашь собственное приложение на Microsoft.NET Framework\n\n"
+#                "<b>4. ВВЕДЕНИЕ В ЯЗЫК JAVA И ПЛАТФОРМУ РАЗРАБОТКИ</b>\n"
+#                "Самые передовые практики и современные инструменты в мире корпоративной разработки на Java."
+#                " Эксперты и инженеры-практики по разработке и архитектуре ПО\n\n"
+#                "<b>5. Кейс-лаборатория КРОК</b>\n"
+#                "Закрой практику в университете, решая кейс под реальный бизнес-запрос. "
+#                "Тебя ждут 12 недель командной работы под руководством наставников\n\n"
+#                "<b>КЛИКАЙ НА КНОПКИ чтобы узнать подробнее</b>"

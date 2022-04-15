@@ -39,7 +39,9 @@ class Questions(Model):
 
 class Programs(Model):
     key = fields.IntField(pk=True)
-    question = fields.TextField()
+    text = fields.TextField()
+    is_student = fields.TextField()
+
     # is_active = fields.BooleanField()
 
     class Meta:

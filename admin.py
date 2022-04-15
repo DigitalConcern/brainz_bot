@@ -59,6 +59,7 @@ async def admin(m: Message, dialog_manager: DialogManager):
 
 MyBot.register_handler(method=admin, text="/admin", state="*")
 
+
 # Корневой диалог админа
 root_admin_dialog = Dialog(
     Window(

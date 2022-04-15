@@ -57,8 +57,8 @@ async def run():
                     "engine": "tortoise.backends.asyncpg",
                     "credentials": {
                         "database": "postgres",
-                        "host": "localhost",
-                        "password": "1234",
+                        "host": "172.18.0.2",
+                        "password": "postgres",
                         "port": 5432,
                         "user": "postgres"
                     }

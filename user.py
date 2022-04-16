@@ -1,3 +1,5 @@
+from asyncio import coroutine, run
+
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, ParseMode
 
@@ -40,7 +42,7 @@ async def start(m: Message, dialog_manager: DialogManager):
     #                     "В 2021 году студенты прошли обучение по 10 направлениям!\n\n",
     #                is_student="All"
     #                ).save()
-    await keys.run_keys()
+    await dialog_manager.done()
     if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
         await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
         # Если его нет в базе, то предлагаем зарегистрироваться
@@ -241,12 +243,15 @@ async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManage
 # Диалог программ будет заполняться в зависимости от того, кто юзер (шк, студ)
 # На данный момент программы одинаковы для всех
 # Так как через словарь сделать не получается, нужно через бд, где будет столбец для кого программа
+async def init_items() -> list:
+    return [list(row) for row in await Programs.filter().values_list("key", flat=True)]
+
 programs_dialog = Dialog(
     Window(
         Format("Fuck"),
         Row(Select(
             Format("{item}"),
-            items=list("{keys}"),
+            items=run(init_items()),
             item_id_getter=lambda x: x,
             id="grades",
             on_click=on_program_clicked

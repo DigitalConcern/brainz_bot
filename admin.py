@@ -86,9 +86,8 @@ async def on_who_clicked(c: ChatEvent, select: Select, manager: DialogManager, i
 # Обрабатываем сообщение о подтверждении записи (поста)
 async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
     for grade in categories[manager.current_context().dialog_data["category"]]:
-        for us_id in await ActiveUsers.filter(grade=grade).values_list("user_id", flat=True):
-            await MyBot.bot.send_message(us_id,
-                                         manager.current_context().dialog_data["post"])
+        await MyBot.bot.send_message(await ActiveUsers.filter(grade=grade).values_list("user_id", flat=True),
+                                     manager.current_context().dialog_data["post"])
     await MyBot.bot.send_message(CHAT_ID, "Пост отправлен")
     await manager.done()
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
@@ -159,7 +158,6 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
     await MyBot.bot.send_message(CHAT_ID, "Ответ отправлен")
     await manager.done()
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
-
 
 # Ветка с ответом на вопрос
 answer_dialog = Dialog(

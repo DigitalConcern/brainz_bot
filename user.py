@@ -233,7 +233,7 @@ async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManage
 # Так как через словарь сделать не получается, нужно через бд, где будет столбец для кого программа
 programs_dialog = Dialog(
     Window(
-        Format("Fuck"),
+        Format("{keys}"),
         Row(Select(
             Format("{item}"),
             items="keys",

@@ -32,7 +32,6 @@ async def start(m: Message, dialog_manager: DialogManager):
     #                     "В 2021 году студенты прошли обучение по 10 направлениям!\n\n",
     #                is_student="All"
     #                ).save()
-    await keys.run_keys()
     if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
         await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
         # Если его нет в базе, то предлагаем зарегистрироваться

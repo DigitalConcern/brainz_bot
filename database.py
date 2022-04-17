@@ -8,6 +8,7 @@ from tortoise.models import Model
 # Зарегситрировавшиеся пользователи добавляются в базу данных
 class ActiveUsers(Model):
     user_id = fields.IntField(pk=True)
+    # is_admin
     code_name = fields.TextField()
     user_name = fields.TextField()
     grade = fields.TextField()
@@ -18,6 +19,7 @@ class ActiveUsers(Model):
 
 
 # Таблица с администраторами
+# PS мб не нужна
 class Admins(Model):
     user_id = fields.IntField()
 
@@ -39,13 +41,13 @@ class Questions(Model):
 
 class Programs(Model):
     key = fields.IntField(pk=True)
-    text = fields.TextField()
-    is_student = fields.TextField()
-
-    # is_active = fields.BooleanField()
+    description = fields.TextField()
+    info = fields.TextField()
+    category = fields.TextField()
+    is_active = fields.BooleanField()
 
     class Meta:
-        table = "programs_student"
+        table = "programs"
 
 
 # Инициализация базы данных
@@ -57,7 +59,7 @@ async def run():
                     "engine": "tortoise.backends.asyncpg",
                     "credentials": {
                         "database": "postgres",
-                        "host": "172.18.0.2",
+                        "host": "localhost", # 172.18.0.2
                         "password": "postgres",
                         "port": 5432,
                         "user": "postgres"

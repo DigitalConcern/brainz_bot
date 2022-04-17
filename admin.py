@@ -10,6 +10,7 @@ from aiogram_dialog.widgets.text import Const, Format
 from database import ActiveUsers, Questions
 from bot import MyBot
 from config import CHAT_ID
+from user import UserSG
 
 # В данном файле находится интерфейс админа
 
@@ -54,12 +55,14 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
 # Хендлер на команду /admin
 async def admin(m: Message, dialog_manager: DialogManager):
     await MyBot.bot.send_message(m.chat.id, "Hello, admin!")
-    await dialog_manager.done()
     await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
 MyBot.register_handler(method=admin, text="/admin", state="*")
 
+
+async def back_to_user(m: Message, c: ChatEvent, dialog_manager: DialogManager):
+    await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
 # Корневой диалог админа
 root_admin_dialog = Dialog(
@@ -67,6 +70,7 @@ root_admin_dialog = Dialog(
         Const("Выбери действие 🤔"),
         Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
+        Button(Const("⏪ К пользовательскому меню"), id="back_to_user", on_click=back_to_user),
         state=AdminSG.admin
     ),
     launch_mode=LaunchMode.ROOT
@@ -156,9 +160,9 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
         manager.current_context().dialog_data["answer"])
     # Находим в бд кому отправить сообщение, после чего - отправляем
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
-    await MyBot.bot.send_message(CHAT_ID, "Ответ отправлен")
+    await MyBot.bot.send_message(c.from_user.id, "Ответ отправлен")
     await manager.done()
-    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+    await manager.bg().done()
 
 # Ветка с ответом на вопрос
 answer_dialog = Dialog(

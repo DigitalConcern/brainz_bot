@@ -1,5 +1,5 @@
 from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.types import Message, CallbackQuery, ParseMode
+from aiogram.types import Message, CallbackQuery, ParseMode, ReplyKeyboardMarkup, KeyboardButton
 
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto, LaunchMode
@@ -9,7 +9,7 @@ from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions, Programs
 from bot import MyBot
-from config import Counter, NameCounter, CHAT_ID, programs_list
+from config import Counter, NameCounter, CHAT_ID
 
 
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
@@ -25,13 +25,42 @@ class RegistrationSG(StatesGroup):
 
 
 async def start(m: Message, dialog_manager: DialogManager):
-    # await Programs(key=1,
-    #                text="<b>1. Летняя ИТ-школа КРОК</b>\n"
-    #                     "Бесплатный интенсив по погружению в одну из ИТ-профессий:"
-    #                     " от разработки и аналитики до маркетинга и продаж.\n"
-    #                     "В 2021 году студенты прошли обучение по 10 направлениям!\n\n",
-    #                is_student="All"
-    #                ).save()
+    # await Programs(
+    #     key=1,
+    #     description="<b>1. Летняя ИТ-школа КРОК</b> – бесплатный интенсив по погружению в одну из ИТ-профессий:"
+    #                 " от разработки и аналитики до маркетинга и продаж."
+    #                 "В 2021 году студенты прошли обучение по 10 направлениям!",
+    #     info="подробная инфа о первой программе",
+    #     category="students",
+    #     is_active=True
+    # ).save()
+
+    # await Programs(
+    #     key=2,
+    #     description="<b>2. Лидерская программа</b> — это сообщество предприимчивых студентов."
+    #                 " Мы даем возможности для прокачки, знакомим с экспертами из бизнеса"
+    #                 " и помогаем реализовывать инициативы в своем вузе.",
+    #     info="подробная инфа о второй программе",
+    #     category="students",
+    #     is_active=True
+    # ).save()
+
+    # await Programs(
+    #     key=3,
+    #     description="<b>3. Команда школьников готова на все</b>, чтобы их ИТ-проект принес пользу. "
+    #                 "Новый сезон большой франшизы о вызовах, дружбе и технологиях.",
+    #     info="подробная инфа о третьей программе",
+    #     category="school",
+    #     is_active=True
+    # ).save()
+
+    # if user in wl:
+    # button_hi = KeyboardButton('/admin')
+    # admin_kb = ReplyKeyboardMarkup()
+    # admin_kb.add(button_hi)
+
+    # Если ActiveUser is_admin, то нужно ему предоставить выбор пойти сразу в админский диалог или нет, чтобы
+    # также была возможность вернуться к этому диалогу
     if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
         await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
         # Если его нет в базе, то предлагаем зарегистрироваться
@@ -190,8 +219,8 @@ question_dialog = Dialog(
     Window(
         Format("Проверь список ответов и вопросов!\n"
                "Возможно, на твой вопрос уже есть <b>ответ!</b>"),
-        SwitchTo(Const("Задать вопрос эксперту"), id="ask", state=QuestionsSG.ask),
         SwitchTo(Const("Ответы на частые вопросы"), id="faq", state=QuestionsSG.faq),
+        SwitchTo(Const("Задать вопрос эксперту"), id="ask", state=QuestionsSG.ask),
         Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,
         state=QuestionsSG.choose
@@ -215,7 +244,8 @@ question_dialog = Dialog(
 # функция для получения данных из состояний
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     return {
-        'global_info': "".join(list(await Programs.all().values_list("text", flat=True))),
+        # Достаем из базы тексты всех программ
+        'programs_list': "\n\n".join(await Programs.all().values_list("description", flat=True)),
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
         'program_info': dialog_manager.current_context().dialog_data.get("program_info", None),
         'keys': list(await Programs.all().values_list("key", flat=True))
@@ -223,9 +253,10 @@ async def get_data_programs(dialog_manager: DialogManager, **kwargs):
 
 
 async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
-    # Реализовать через бд
+    # Реализовано через БД!
     manager.current_context().dialog_data["choose_program"] = item_id
-    manager.current_context().dialog_data["program_info"] = programs_list[item_id]
+    manager.current_context().dialog_data["program_info"] = "".join(
+        await Programs.filter(key=int(item_id)).values_list("info", flat=True))
     await manager.switch_to(ProgramsSG.program_info)
 
 
@@ -234,7 +265,7 @@ async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManage
 # Так как через словарь сделать не получается, нужно через бд, где будет столбец для кого программа
 programs_dialog = Dialog(
     Window(
-        Format("{global_info}"),
+        Format("{programs_list}"),
         Row(Select(
             Format("{item}"),
             items="keys",
@@ -248,7 +279,7 @@ programs_dialog = Dialog(
         state=ProgramsSG.choose_program
     ),
     Window(
-        Format('program_info'),
+        Format('{program_info}'),
         Back(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
@@ -260,18 +291,6 @@ programs_dialog = Dialog(
 # Регистрируем диалоги
 MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog, question_dialog)
 
-#                "<b>1. Летняя ИТ-школа КРОК</b>\n"
-#                "Бесплатный интенсив по погружению в одну из ИТ-профессий:"
-#                " от разработки и аналитики до маркетинга и продаж.\n"
-#                "В 2021 году студенты прошли обучение по 10 направлениям!\n\n"
-#                "<b>2. Лидерская программа</b>\n"
-#                "Это сообщество предприимчивых студентов. Мы даем возможности для прокачки,"
-#                " знакомим с экспертами из бизнеса и помогаем реализовывать инициативы в своем вузе.\n\n"
-#                "<b>3. Разработка приложений на языке С#</b>\n"
-#                "ПРАКТИЧЕСКИЙ КУРС ОТ КРОК\n"
-#                "Ты на практике разберешься в архитектуре приложений,"
-#                " погрузишься в особенности программирования на C#"
-#                " и создашь собственное приложение на Microsoft.NET Framework\n\n"
 #                "<b>4. ВВЕДЕНИЕ В ЯЗЫК JAVA И ПЛАТФОРМУ РАЗРАБОТКИ</b>\n"
 #                "Самые передовые практики и современные инструменты в мире корпоративной разработки на Java."
 #                " Эксперты и инженеры-практики по разработке и архитектуре ПО\n\n"

@@ -215,7 +215,7 @@ question_dialog = Dialog(
 # функция для получения данных из состояний
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     return {
-        'global_info': "".join(list(await Programs.all().values_list("text", flat=True))),
+        # 'global_info': "".join(list(await Programs.all().values_list("text", flat=True))),
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
         'program_info': dialog_manager.current_context().dialog_data.get("program_info", None),
         'keys': list(await Programs.all().values_list("key", flat=True))

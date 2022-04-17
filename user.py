@@ -12,14 +12,6 @@ from bot import MyBot
 from config import Counter, NameCounter, CHAT_ID, programs_list
 
 
-class keys():
-    KEYS = []
-
-    @classmethod
-    async def run_keys(cls):
-        cls.KEYS = await Programs.filter().values_list("key", flat=True)
-
-
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
 # список админов и инфу про программы
 
@@ -227,7 +219,6 @@ async def get_data_programs(dialog_manager: DialogManager, **kwargs):
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
         'program_info': dialog_manager.current_context().dialog_data.get("program_info", None),
         'keys': await Programs.filter().values_list("key", flat=True)
-
     }
 
 
@@ -246,13 +237,13 @@ programs_dialog = Dialog(
         Format("Fuck"),
         Row(Select(
             Format("{item}"),
-            items=list("{keys}"),
+            items="keys",
             item_id_getter=lambda x: x,
             id="grades",
             on_click=on_program_clicked
         )),
         Cancel(Const("⏪ Назад")),
-        # getter=get_data_programs,
+        getter=get_data_programs,
         parse_mode=ParseMode.HTML,
         state=ProgramsSG.choose_program
     ),

@@ -8,7 +8,7 @@ from tortoise.models import Model
 # Зарегситрировавшиеся пользователи добавляются в базу данных
 class ActiveUsers(Model):
     user_id = fields.IntField(pk=True)
-    # is_admin
+    is_admin = fields.BooleanField()
     code_name = fields.TextField()
     user_name = fields.TextField()
     grade = fields.TextField()
@@ -18,13 +18,13 @@ class ActiveUsers(Model):
         table = "users"
 
 
-# Таблица с администраторами
-# PS мб не нужна
-class Admins(Model):
-    user_id = fields.IntField()
-
-    class Meta:
-        table = "admins"
+# # Таблица с администраторами
+# # PS мб не нужна
+# class Admins(Model):
+#     user_id = fields.IntField()
+#
+#     class Meta:
+#         table = "admins"
 
 
 # Таблица с вопросами
@@ -40,7 +40,8 @@ class Questions(Model):
 
 
 class Programs(Model):
-    key = fields.IntField(pk=True)
+    id = fields.BigIntField(pk=True)
+    key = fields.IntField()
     description = fields.TextField()
     info = fields.TextField()
     category = fields.TextField()
@@ -60,7 +61,7 @@ async def run():
                     "credentials": {
                         "database": "postgres",
                         "host": "localhost", # 172.18.0.2
-                        "password": "postgres",
+                        "password": "1234",
                         "port": 5432,
                         "user": "postgres"
                     }

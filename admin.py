@@ -1,3 +1,6 @@
+import os
+
+from aiogram import types
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import Message, CallbackQuery, ParseMode
 
@@ -17,8 +20,8 @@ from user import UserSG
 # Словарь категорий для обработки данных из таблицы активных пользователей
 categories = {
     "Всем": ["<7", "8", "9", "10", "11", "12"],
-    "Студенты": "12",
-    "Школьники": ["<7", "8", "9", "10", "11"]
+    "Студентам": "12",
+    "Школьникам": ["<7", "8", "9", "10", "11"]
 }
 
 
@@ -49,6 +52,7 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
         'ticket': dialog_manager.current_context().dialog_data.get("ticket", None),
         'check': dialog_manager.current_context().dialog_data.get("check", None),
         'category': dialog_manager.current_context().dialog_data.get("category", None),
+        'photo': dialog_manager.current_context().dialog_data.get("photo", None),
     }
 
 
@@ -60,25 +64,22 @@ async def admin(m: Message, dialog_manager: DialogManager):
 
 MyBot.register_handler(method=admin, text="/admin", state="*")
 
-
-async def back_to_user(m: Message, c: ChatEvent, dialog_manager: DialogManager):
-    await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
-
 # Корневой диалог админа
-root_admin_dialog = Dialog(
+menu_admin_dialog = Dialog(
     Window(
         Const("Выбери действие 🤔"),
         Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
-        Button(Const("⏪ К пользовательскому меню"), id="back_to_user", on_click=back_to_user),
+        Cancel(Const("⏪ К пользовательскому меню")),
         state=AdminSG.admin
     ),
-    launch_mode=LaunchMode.ROOT
+    launch_mode=LaunchMode.SINGLE_TOP
 )
 
 
 async def post_handler(m: Message, dialog: Dialog, manager: DialogManager):
     manager.current_context().dialog_data["post"] = m.text
+    manager.current_context().dialog_data["photo"] = await MyBot.bot.get_file(m.photo[-1].file_id)
     await manager.dialog().switch_to(PostSG.to_who)
 
 
@@ -91,8 +92,11 @@ async def on_who_clicked(c: ChatEvent, select: Select, manager: DialogManager, i
 # Обрабатываем сообщение о подтверждении записи (поста)
 async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
     for grade in categories[manager.current_context().dialog_data["category"]]:
-        await MyBot.bot.send_message(await ActiveUsers.filter(grade=grade).values_list("user_id", flat=True),
-                                     manager.current_context().dialog_data["post"])
+        for chel in await ActiveUsers.filter(grade=grade).values_list("user_id", flat=True):
+            if not manager.current_context().dialog_data["post"] is None:
+                await MyBot.bot.send_message(chel, manager.current_context().dialog_data["post"])
+            if not manager.current_context().dialog_data["photo"] is None:
+                await MyBot.bot.send_photo(chel, manager.current_context().dialog_data["photo"].file_id)
     await MyBot.bot.send_message(CHAT_ID, "Пост отправлен")
     await manager.done()
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
@@ -102,7 +106,7 @@ async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogMa
 post_dialog = Dialog(
     Window(
         Const("Пожалуйста, напишите текст поста"),
-        MessageInput(post_handler),
+        MessageInput(post_handler, content_types=["text", "photo"]),
         Cancel(Const("⏪ Назад")),
         state=PostSG.post
     ),
@@ -164,6 +168,7 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
     await manager.done()
     await manager.bg().done()
 
+
 # Ветка с ответом на вопрос
 answer_dialog = Dialog(
     Window(
@@ -188,4 +193,4 @@ answer_dialog = Dialog(
 )
 
 # Регистрируем все диалоги
-MyBot.register_dialogs(root_admin_dialog, answer_dialog, post_dialog)
+MyBot.register_dialogs(menu_admin_dialog, answer_dialog, post_dialog)

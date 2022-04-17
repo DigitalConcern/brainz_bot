@@ -24,63 +24,6 @@ class RegistrationSG(StatesGroup):
     choose_grade = State()
 
 
-async def start(m: Message, dialog_manager: DialogManager):
-    # await Programs(
-    #     key=1,
-    #     description="<b>1. Летняя ИТ-школа КРОК</b> – бесплатный интенсив по погружению в одну из ИТ-профессий:"
-    #                 " от разработки и аналитики до маркетинга и продаж."
-    #                 "В 2021 году студенты прошли обучение по 10 направлениям!",
-    #     info="подробная инфа о первой программе",
-    #     category="students",
-    #     is_active=True
-    # ).save()
-
-    # await Programs(
-    #     key=2,
-    #     description="<b>2. Лидерская программа</b> — это сообщество предприимчивых студентов."
-    #                 " Мы даем возможности для прокачки, знакомим с экспертами из бизнеса"
-    #                 " и помогаем реализовывать инициативы в своем вузе.",
-    #     info="подробная инфа о второй программе",
-    #     category="students",
-    #     is_active=True
-    # ).save()
-
-    # await Programs(
-    #     key=3,
-    #     description="<b>3. Команда школьников готова на все</b>, чтобы их ИТ-проект принес пользу. "
-    #                 "Новый сезон большой франшизы о вызовах, дружбе и технологиях.",
-    #     info="подробная инфа о третьей программе",
-    #     category="school",
-    #     is_active=True
-    # ).save()
-
-    # if user in wl:
-    # button_hi = KeyboardButton('/admin')
-    # admin_kb = ReplyKeyboardMarkup()
-    # admin_kb.add(button_hi)
-
-    # Если ActiveUser is_admin, то нужно ему предоставить выбор пойти сразу в админский диалог или нет, чтобы
-    # также была возможность вернуться к этому диалогу
-    if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
-        await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
-        # Если его нет в базе, то предлагаем зарегистрироваться
-        dialog_manager.current_context().dialog_data["id"] = m.from_user.id
-    else:
-        await MyBot.bot.send_message(m.from_user.id, f'Привет, '
-                                                     f'<b>{"".join((await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0])}!</b>',
-                                     parse_mode="HTML")
-        # Если он есть то переходим в меню
-        await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
-        dialog_manager.current_context().dialog_data["name"] = \
-            (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]
-        dialog_manager.current_context().dialog_data["grade"] = \
-            (await ActiveUsers.filter(user_id=m.from_user.id).values_list("grade"))[0]
-
-
-# Регистрируем хэндлер start
-MyBot.register_handler(method=start, text="/start", state="*")
-
-
 async def name_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager):
     manager.current_context().dialog_data["name"] = m.text
     await manager.dialog().switch_to(RegistrationSG.grade)
@@ -93,6 +36,7 @@ async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogMa
     while await ActiveUsers.filter(code_name=count).values_list():
         count = NameCounter.get_count()
     await ActiveUsers(user_id=manager.current_context().dialog_data["id"],
+                      is_admin=False,
                       code_name=count,
                       user_name=manager.current_context().dialog_data["name"],
                       grade="12"
@@ -109,6 +53,7 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
     while await ActiveUsers.filter(code_name=count).values_list():
         count = NameCounter.get_count()
     await ActiveUsers(user_id=manager.current_context().dialog_data["id"],
+                      is_admin=False,
                       code_name=count,
                       user_name=manager.current_context().dialog_data["name"],
                       grade=manager.current_context().dialog_data["grade"]
@@ -161,10 +106,17 @@ registration_dialog = Dialog(
 # Класс состояний пользователя
 class UserSG(StatesGroup):
     menu = State()
+    admin_menu = State()
 
 
 # Класс состояний программ
-class ProgramsSG(StatesGroup):
+class ProgramsSG_std(StatesGroup):
+    choose_program = State()
+    program_info = State()
+
+
+# Класс состояний программ
+class ProgramsSG_sch(StatesGroup):
     choose_program = State()
     program_info = State()
 
@@ -191,14 +143,26 @@ user_menu_dialog = Dialog(
         Format("Что тебя интересует?"),
         # Я думал сделать два диалога для шк и студ, но это тупо, поэтому нужно подумать как на этом этапе выгрузить
         # из бд текст для шк и студов по отдельности
-        Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG.choose_program),
-        Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG.choose_program),
+        Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG_std.choose_program),
+        Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG_sch.choose_program),
         Start(Const("Задать вопрос ❓"), id="qu", state=QuestionsSG.choose),
         parse_mode=ParseMode.HTML,
         # getter=get_data_user,
         state=UserSG.menu
     ),
-    launch_mode=LaunchMode.ROOT
+    Window(
+        Format("Что тебя интересует?"),
+        # Я думал сделать два диалога для шк и студ, но это тупо, поэтому нужно подумать как на этом этапе выгрузить
+        # из бд текст для шк и студов по отдельности
+        Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG_std.choose_program),
+        Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG_sch.choose_program),
+        Start(Const("Задать вопрос ❓"), id="qu", state=QuestionsSG.choose),
+        Cancel(Const("Стать Богом")),
+        parse_mode=ParseMode.HTML,
+        # getter=get_data_user,
+        state=UserSG.admin_menu
+    ),
+    launch_mode=LaunchMode.SINGLE_TOP
 )
 
 
@@ -245,51 +209,89 @@ question_dialog = Dialog(
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     return {
         # Достаем из базы тексты всех программ
-        'programs_list': "\n\n".join(await Programs.all().values_list("description", flat=True)),
+        'programs_list_student': "\n\n".join(
+            await Programs.filter(category="students").values_list("description", flat=True)),
+        'programs_list_school': "\n\n".join(
+            await Programs.filter(category="school").values_list("description", flat=True)),
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
         'program_info': dialog_manager.current_context().dialog_data.get("program_info", None),
-        'keys': list(await Programs.all().values_list("key", flat=True))
+        'keys_student': list(await Programs.filter(category="students").values_list("key", flat=True)),
+        'keys_school': list(await Programs.filter(category="school").values_list("key", flat=True))
     }
 
 
-async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
-    # Реализовано через БД!
+async def on_program_clicked_std(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
+    # Реализовано через БД
     manager.current_context().dialog_data["choose_program"] = item_id
     manager.current_context().dialog_data["program_info"] = "".join(
-        await Programs.filter(key=int(item_id)).values_list("info", flat=True))
-    await manager.switch_to(ProgramsSG.program_info)
+        await Programs.filter(key=int(item_id), category="students").values_list("info", flat=True))
+    await manager.switch_to(ProgramsSG_std.program_info)
+
+
+async def on_program_clicked_sch(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
+    # Реализовано через БД
+    manager.current_context().dialog_data["choose_program"] = item_id
+    manager.current_context().dialog_data["program_info"] = "".join(
+        await Programs.filter(key=int(item_id), category="school").values_list("info", flat=True))
+    await manager.switch_to(ProgramsSG_sch.program_info)
 
 
 # Диалог программ будет заполняться в зависимости от того, кто юзер (шк, студ)
 # На данный момент программы одинаковы для всех
 # Так как через словарь сделать не получается, нужно через бд, где будет столбец для кого программа
-programs_dialog = Dialog(
+programs_dialog_sch = Dialog(
     Window(
-        Format("{programs_list}"),
+        Format("{programs_list_school}"),
         Row(Select(
             Format("{item}"),
-            items="keys",
+            items="keys_school",
             item_id_getter=lambda x: x,
             id="grades",
-            on_click=on_program_clicked
+            on_click=on_program_clicked_sch
         )),
         Cancel(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
-        state=ProgramsSG.choose_program
+        state=ProgramsSG_sch.choose_program
     ),
     Window(
         Format('{program_info}'),
         Back(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
-        state=ProgramsSG.program_info
+        state=ProgramsSG_sch.program_info
+    ),
+    launch_mode=LaunchMode.SINGLE_TOP
+)
+
+programs_dialog_std = Dialog(
+    Window(
+        Format("{programs_list_student}"),
+        Row(Select(
+            Format("{item}"),
+            items="keys_student",
+            item_id_getter=lambda x: x,
+            id="grades",
+            on_click=on_program_clicked_std
+        )),
+        Cancel(Const("⏪ Назад")),
+        getter=get_data_programs,
+        parse_mode=ParseMode.HTML,
+        state=ProgramsSG_std.choose_program
+    ),
+
+    Window(
+        Format('{program_info}'),
+        Back(Const("⏪ Назад")),
+        getter=get_data_programs,
+        parse_mode=ParseMode.HTML,
+        state=ProgramsSG_std.program_info
     ),
     launch_mode=LaunchMode.SINGLE_TOP
 )
 
 # Регистрируем диалоги
-MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog, question_dialog)
+MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog_sch, programs_dialog_std, question_dialog)
 
 #                "<b>4. ВВЕДЕНИЕ В ЯЗЫК JAVA И ПЛАТФОРМУ РАЗРАБОТКИ</b>\n"
 #                "Самые передовые практики и современные инструменты в мире корпоративной разработки на Java."

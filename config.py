@@ -3,6 +3,7 @@ import random
 API_TOKEN = "5176288897:AAFWal8jXz6Z4SKPJYf4MNsxc5tRskDQRYY"
 CHAT_ID = "-721759162"
 
+
 # Пока программы не достаются из базы
 programs_list = {
     "1": "Программа 1",

@@ -217,7 +217,7 @@ async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     return {
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
         'program_info': dialog_manager.current_context().dialog_data.get("program_info", None),
-        'keys': await Programs.filter().values_list("key", flat=True)
+        'keys': list(await Programs.filter().values_list("key", flat=True))
     }
 
 

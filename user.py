@@ -248,7 +248,7 @@ programs_dialog = Dialog(
         state=ProgramsSG.choose_program
     ),
     Window(
-        Format('{program_info}'),
+        Format('program_info'),
         Back(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,

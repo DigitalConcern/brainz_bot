@@ -7,7 +7,7 @@ jobs:
 
   build_and_pub:
     # Если тесты были пройдены успешно
-    runs-on: [alpine-latest]
+    runs-on: [ubuntu-latest]
     env:
       LOGIN: ${{ secrets.DOCKER_LOGIN }}
       NAME: ${{ secrets.DOCKER_NAME }}
@@ -28,7 +28,7 @@ jobs:
     # Если мы успешно собрали контейнер и отправили в registry, то делаем хук деплоймент серверу
     # Попробуем готовый экшен curl из маркетплэйса
     needs: [build_and_pub]
-    runs-on: [alpine-latest]
+    runs-on: [ubuntu-latest]
     steps:
       - name: Writing key file
         run: echo ${{ secrets.BRAINZ_PRIVATE }}

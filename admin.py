@@ -2,12 +2,13 @@ import os
 
 from aiogram import types
 from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.types import Message, CallbackQuery, ParseMode
+from aiogram.types import Message, CallbackQuery, ParseMode, ContentType
 
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
 from aiogram_dialog.manager.protocols import LaunchMode
 from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Select, Back, Column, Start, Cancel
+from aiogram_dialog.widgets.media import StaticMedia
 from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions
@@ -70,7 +71,7 @@ menu_admin_dialog = Dialog(
         Const("Выбери действие 🤔"),
         Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
-        Cancel(Const("⏪ К пользовательскому меню")),
+        Cancel(Const("⏪ Назад")),
         state=AdminSG.admin
     ),
     launch_mode=LaunchMode.SINGLE_TOP
@@ -78,8 +79,12 @@ menu_admin_dialog = Dialog(
 
 
 async def post_handler(m: Message, dialog: Dialog, manager: DialogManager):
-    manager.current_context().dialog_data["post"] = m.text
-    manager.current_context().dialog_data["photo"] = await MyBot.bot.get_file(m.photo[-1].file_id)
+    if m.text is None:
+        manager.current_context().dialog_data["post"] = m.caption
+        manager.current_context().dialog_data["photo"] = await MyBot.bot.get_file(m.photo[-1].file_id)
+    else:
+        manager.current_context().dialog_data["post"] = m.text
+        manager.current_context().dialog_data["photo"] = None
     await manager.dialog().switch_to(PostSG.to_who)
 
 
@@ -93,10 +98,11 @@ async def on_who_clicked(c: ChatEvent, select: Select, manager: DialogManager, i
 async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
     for grade in categories[manager.current_context().dialog_data["category"]]:
         for chel in await ActiveUsers.filter(grade=grade).values_list("user_id", flat=True):
-            if not manager.current_context().dialog_data["post"] is None:
+            if manager.current_context().dialog_data["photo"] is None:
                 await MyBot.bot.send_message(chel, manager.current_context().dialog_data["post"])
-            if not manager.current_context().dialog_data["photo"] is None:
-                await MyBot.bot.send_photo(chel, manager.current_context().dialog_data["photo"].file_id)
+            else:
+                await MyBot.bot.send_photo(chel, manager.current_context().dialog_data["photo"].file_id,
+                                           caption=manager.current_context().dialog_data["post"])
     await MyBot.bot.send_message(CHAT_ID, "Пост отправлен")
     await manager.done()
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
@@ -127,7 +133,8 @@ post_dialog = Dialog(
     ),
     Window(
         Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
-               '<b>Пост:</b> {post}\n'),
+               '<b>Пост:</b> {post}\n'
+               ),
         Column(
             Button(Const("Всё верно! ✅"), id="yes", on_click=on_post_ok_clicked),
             Back(Const("⏪ Назад"))

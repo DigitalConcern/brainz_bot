@@ -19,14 +19,8 @@ from config import Counter, NameCounter, CHAT_ID
 # Класс состояний регистрации пользователя
 class RegistrationSG(StatesGroup):
     hi = State()
-    name = State()
     grade = State()
     choose_grade = State()
-
-
-async def name_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager):
-    manager.current_context().dialog_data["name"] = m.text
-    await manager.dialog().switch_to(RegistrationSG.grade)
 
 
 # Если студент нажал кнопку "студент"
@@ -38,7 +32,7 @@ async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogMa
     await ActiveUsers(user_id=manager.current_context().dialog_data["id"],
                       is_admin=False,
                       code_name=count,
-                      user_name=manager.current_context().dialog_data["name"],
+                      user_name=c.from_user.first_name,
                       grade="12"
                       ).save()
     await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
@@ -60,21 +54,15 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
                       ).save()
     await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
     await manager.done()
-    await manager.start(UserSG.menu)
+    await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
 
 # Диалог регистрации пользователя
 registration_dialog = Dialog(
     Window(
         Const("Greetings! Мы - КРОК, пройди пжж регистрацию"),
-        SwitchTo(Const("Зарегистрироваться!"), id="fi", state=RegistrationSG.name),
+        SwitchTo(Const("Зарегистрироваться!"), id="fi", state=RegistrationSG.grade),
         state=RegistrationSG.hi
-    ),
-    Window(
-        Const("Как тебя зовут?"),
-        MessageInput(name_handler),
-        Back(Const("⏪ Назад")),
-        state=RegistrationSG.name
     ),
     Window(
         Const("Ты школьник или студент?"),
@@ -157,12 +145,12 @@ user_menu_dialog = Dialog(
         Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG_std.choose_program),
         Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG_sch.choose_program),
         Start(Const("Задать вопрос ❓"), id="qu", state=QuestionsSG.choose),
-        Cancel(Const("Стать Богом")),
+        Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,
         # getter=get_data_user,
         state=UserSG.admin_menu
     ),
-    launch_mode=LaunchMode.SINGLE_TOP
+    launch_mode=LaunchMode.STANDARD
 )
 
 
@@ -175,8 +163,18 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
     await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name, parse_mode="HTML")
     await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
     await MyBot.bot.send_message(m.from_user.id, 'Вопрос отправлен!')
-    await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
+    if (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:
+        await manager.start(UserSG.admin_menu, mode=StartMode.RESET_STACK)
+    else:
+        await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
+
+
+async def smrt_back_is_admin(c: CallbackQuery, button: Button, manager: DialogManager):
+    if (await ActiveUsers.filter(user_id=c.from_user.id).values_list("is_admin", flat=True))[0]:
+        await manager.switch_to(UserSG.admin_menu)
+    else:
+        await manager.switch_to(UserSG.menu)
 
 # Диалог с вопросами
 question_dialog = Dialog(
@@ -185,7 +183,7 @@ question_dialog = Dialog(
                "Возможно, на твой вопрос уже есть <b>ответ!</b>"),
         SwitchTo(Const("Ответы на частые вопросы"), id="faq", state=QuestionsSG.faq),
         SwitchTo(Const("Задать вопрос эксперту"), id="ask", state=QuestionsSG.ask),
-        Cancel(Const("⏪ Назад")),
+        Button(Const("⏪ Назад"), id="smrt_back_quest", on_click=smrt_back_is_admin),
         parse_mode=ParseMode.HTML,
         state=QuestionsSG.choose
 
@@ -201,7 +199,7 @@ question_dialog = Dialog(
         SwitchTo(Const("⏪ Назад"), id="smrt_back_ask", state=QuestionsSG.choose),
         state=QuestionsSG.ask
     ),
-    launch_mode=LaunchMode.SINGLE_TOP
+    launch_mode=LaunchMode.EXCLUSIVE
 )
 
 
@@ -249,7 +247,7 @@ programs_dialog_sch = Dialog(
             id="grades",
             on_click=on_program_clicked_sch
         )),
-        Cancel(Const("⏪ Назад")),
+        Button(Const("⏪ Назад"), id="smrt_back_quest", on_click=smrt_back_is_admin),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
         state=ProgramsSG_sch.choose_program
@@ -274,12 +272,11 @@ programs_dialog_std = Dialog(
             id="grades",
             on_click=on_program_clicked_std
         )),
-        Cancel(Const("⏪ Назад")),
+        Button(Const("⏪ Назад"), id="smrt_back_quest", on_click=smrt_back_is_admin),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
         state=ProgramsSG_std.choose_program
     ),
-
     Window(
         Format('{program_info}'),
         Back(Const("⏪ Назад")),

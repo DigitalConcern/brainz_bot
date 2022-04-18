@@ -61,7 +61,7 @@ async def run():
                     "credentials": {
                         "database": "postgres",
                         "host": "localhost", # 172.18.0.2
-                        "password": "1234",
+                        "password": "postgres",
                         "port": 5432,
                         "user": "postgres"
                     }

@@ -49,10 +49,9 @@ async def start(m: Message, dialog_manager: DialogManager):
     #     is_active=True
     # ).save()
 
-    if await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin"):
+    if (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin"))[0][0]:
         await dialog_manager.start(RootAdminSG.root_admin, mode=StartMode.RESET_STACK)
-    # Если ActiveUser is_admin, то нужно ему предоставить выбор пойти сразу в админский диалог или нет, чтобы
-    # также была возможность вернуться к этому диалогу
+        # Если админ
     elif not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
         await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
         # Если его нет в базе, то предлагаем зарегистрироваться

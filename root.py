@@ -81,18 +81,18 @@ async def start(m: Message, dialog_manager: DialogManager):
     #     category="school",
     #     is_active=True
     # ).save()
-    await ActiveUsers(user_id=380781069,
-                      is_admin=True,
-                      code_name="#green10",
-                      user_name="den",
-                      grade="12"
-                      ).save()
-    await ActiveUsers(user_id=678197278,
-                      is_admin=True,
-                      code_name="#red10",
-                      user_name="miha",
-                      grade="12"
-                      ).save()
+    # await ActiveUsers(user_id=380781069,
+    #                   is_admin=True,
+    #                   code_name="#green10",
+    #                   user_name="den",
+    #                   grade="12"
+    #                   ).save()
+    # await ActiveUsers(user_id=678197278,
+    #                   is_admin=True,
+    #                   code_name="#red10",
+    #                   user_name="miha",
+    #                   grade="12"
+    #                   ).save()
 
     if await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin"):
         await dialog_manager.start(RootAdminSG.root_admin, mode=StartMode.RESET_STACK)

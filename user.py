@@ -49,7 +49,7 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
     await ActiveUsers(user_id=manager.current_context().dialog_data["id"],
                       is_admin=False,
                       code_name=count,
-                      user_name=manager.current_context().dialog_data["name"],
+                      user_name=c.from_user.first_name,
                       grade=manager.current_context().dialog_data["grade"]
                       ).save()
     await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
@@ -74,7 +74,6 @@ registration_dialog = Dialog(
     ),
     Window(
         Const("В каком классе ты учишься?"),
-        Back(Const("⏪ Назад")),
         Row(Select(
             Format("{item}"),
             items=["<7",
@@ -87,6 +86,7 @@ registration_dialog = Dialog(
             id="grades",
             on_click=on_grade_clicked,
         )),
+        Back(Const("⏪ Назад")),
         state=RegistrationSG.choose_grade
     )
 )

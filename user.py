@@ -60,19 +60,20 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
 # Диалог регистрации пользователя
 registration_dialog = Dialog(
     Window(
-        Const("Greetings! Мы - КРОК, пройди пжж регистрацию"),
+        Const("Привет! Мы – команда образовательного проекта Brainz, делаем около 50 программ и мероприятий в год: "
+              "игры, кейсы, курсы, практика, акселератор."),
         SwitchTo(Const("Зарегистрироваться!"), id="fi", state=RegistrationSG.grade),
         state=RegistrationSG.hi
     ),
     Window(
-        Const("Ты школьник или студент?"),
+        Const("А чем занимаешься ты?"),
         SwitchTo(Const("Школьник"), id="school", state=RegistrationSG.choose_grade),
         Button(Const("Студент"), id="student", on_click=on_student_clicked),
         Back(Const("⏪ Назад")),
         state=RegistrationSG.grade
     ),
     Window(
-        Const("В каком ты классе?"),
+        Const("В каком классе ты учишься?"),
         Back(Const("⏪ Назад")),
         Row(Select(
             Format("{item}"),
@@ -111,7 +112,8 @@ class ProgramsSG_sch(StatesGroup):
 
 # Класс состояний диалога вопросов
 class QuestionsSG(StatesGroup):
-    choose = State()
+    choose_user = State()
+    choose_admin = State()
     faq = State()
     ask = State()
 
@@ -128,23 +130,21 @@ async def get_data_user(dialog_manager: DialogManager, **kwargs):
 # Диалог юзера (уже зарегистрирован)
 user_menu_dialog = Dialog(
     Window(
-        Format("Что тебя интересует?"),
-        # Я думал сделать два диалога для шк и студ, но это тупо, поэтому нужно подумать как на этом этапе выгрузить
-        # из бд текст для шк и студов по отдельности
+        Format("Это меню. Здесь ты можешь перейти в каталог образовательных программ для школьников или студентов, "
+               "а если у тебя появились вопросы, то задать их команде Brainz."),
         Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG_std.choose_program),
         Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG_sch.choose_program),
-        Start(Const("Задать вопрос ❓"), id="qu", state=QuestionsSG.choose),
+        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.choose_user),
         parse_mode=ParseMode.HTML,
         # getter=get_data_user,
         state=UserSG.menu
     ),
     Window(
-        Format("Что тебя интересует?"),
-        # Я думал сделать два диалога для шк и студ, но это тупо, поэтому нужно подумать как на этом этапе выгрузить
-        # из бд текст для шк и студов по отдельности
+        Format("Это меню. Здесь ты можешь перейти в каталог образовательных программ для школьников или студентов, "
+               "а если у тебя появились вопросы, то задать их команде Brainz."),
         Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG_std.choose_program),
         Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG_sch.choose_program),
-        Start(Const("Задать вопрос ❓"), id="qu", state=QuestionsSG.choose),
+        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.choose_admin),
         Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,
         # getter=get_data_user,
@@ -162,7 +162,7 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
         count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
     await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name, parse_mode="HTML")
     await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
-    await MyBot.bot.send_message(m.from_user.id, 'Вопрос отправлен!')
+    await MyBot.bot.send_message(m.from_user.id, 'Наш сотрудник уже спешит помочь тебе, ответ придет прямо в бот.')
 
     if (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:
         await manager.start(UserSG.admin_menu, mode=StartMode.RESET_STACK)
@@ -172,34 +172,42 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
 
 async def smrt_back_is_admin(c: CallbackQuery, button: Button, manager: DialogManager):
     if (await ActiveUsers.filter(user_id=c.from_user.id).values_list("is_admin", flat=True))[0]:
-        await manager.switch_to(UserSG.admin_menu)
+        await manager.switch_to(QuestionsSG.choose_admin)
     else:
-        await manager.switch_to(UserSG.menu)
+        await manager.switch_to(QuestionsSG.choose_user)
 
 # Диалог с вопросами
 question_dialog = Dialog(
     Window(
-        Format("Проверь список ответов и вопросов!\n"
-               "Возможно, на твой вопрос уже есть <b>ответ!</b>"),
+        Format("Прежде, чем отправить вопрос, убедись, пожалуйста, что ответа нет в FAQ."),
         SwitchTo(Const("Ответы на частые вопросы"), id="faq", state=QuestionsSG.faq),
-        SwitchTo(Const("Задать вопрос эксперту"), id="ask", state=QuestionsSG.ask),
-        Button(Const("⏪ Назад"), id="smrt_back_quest", on_click=smrt_back_is_admin),
+        SwitchTo(Const("Всё равно задать вопрос."), id="ask", state=QuestionsSG.ask),
+        Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,
-        state=QuestionsSG.choose
+        state=QuestionsSG.choose_user
+
+    ),
+    Window(
+        Format("Прежде, чем отправить вопрос, убедись, пожалуйста, что ответа нет в FAQ."),
+        SwitchTo(Const("Ответы на частые вопросы"), id="faq", state=QuestionsSG.faq),
+        Cancel(Const("⏪ Назад")),
+        parse_mode=ParseMode.HTML,
+        state=QuestionsSG.choose_admin
 
     ),
     Window(
         Const("Здесь будут часто ответы на часто задаваемые вопросы!"),
-        SwitchTo(Const("⏪ Назад"), id="smrt_back_faq", state=QuestionsSG.choose),
+        Button(Const("⏪ Назад"), id="smrt_back_faq", on_click=smrt_back_is_admin),
         state=QuestionsSG.faq
     ),
     Window(
-        Const("Введите вопрос"),
+        Const("Отправь в бот сообщение с вопросом – мы перешлем его сотруднику (но только одно, если у тебя появятся "
+              "новые вопросы, заново перейди по кнопке из меню)"),
         MessageInput(quest_handler),
-        SwitchTo(Const("⏪ Назад"), id="smrt_back_ask", state=QuestionsSG.choose),
+        Button(Const("⏪ Назад"), id="smrt_back_ask", on_click=smrt_back_is_admin),
         state=QuestionsSG.ask
     ),
-    launch_mode=LaunchMode.EXCLUSIVE
+    launch_mode=LaunchMode.SINGLE_TOP
 )
 
 
@@ -247,7 +255,8 @@ programs_dialog_sch = Dialog(
             id="grades",
             on_click=on_program_clicked_sch
         )),
-        Button(Const("⏪ Назад"), id="smrt_back_quest", on_click=smrt_back_is_admin),
+        # Button(Const("⏪ Назад"), id="smrt_back_quest", on_click=smrt_back_is_admin),
+        Cancel(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
         state=ProgramsSG_sch.choose_program
@@ -272,7 +281,8 @@ programs_dialog_std = Dialog(
             id="grades",
             on_click=on_program_clicked_std
         )),
-        Button(Const("⏪ Назад"), id="smrt_back_quest", on_click=smrt_back_is_admin),
+        # Button(Const("⏪ Назад"), id="smrt_back_quest", on_click=smrt_back_is_admin),
+        Cancel(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
         state=ProgramsSG_std.choose_program

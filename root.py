@@ -84,6 +84,7 @@ async def start(m: Message, dialog_manager: DialogManager):
         is_active=True,
         link="https://itsolschool.ru/",
     ).save()
+
     await ActiveUsers(user_id=380781069,
                       is_admin=True,
                       code_name="#green10",

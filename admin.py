@@ -13,17 +13,11 @@ from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions
 from bot import MyBot
-from config import CHAT_ID
+from config import CHAT_ID, categories
 from user import UserSG
 
-# В данном файле находится интерфейс админа
 
-# Словарь категорий для обработки данных из таблицы активных пользователей
-categories = {
-    "Всем": ["<7", "8", "9", "10", "11", "12"],
-    "Студентам": "12",
-    "Школьникам": ["<7", "8", "9", "10", "11"]
-}
+# В данном файле находится интерфейс админа
 
 
 # Класс состояний корневого диалога администратора

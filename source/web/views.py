@@ -12,6 +12,7 @@ class HomePageView(TemplateView):
 class UsersPageView(TemplateView):
     model = models.ActiveUsers
     template_name = 'users.html'
+
     # fields = ['user_id', 'code_name']
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -19,7 +20,18 @@ class UsersPageView(TemplateView):
         return context
 
 
-class MailingPageView(CreateView):
-    template_name = 'mailing.html'
-    form_class = forms.CommentForm
-    success_url = reverse_lazy('home')
+class ProgramsPageView(TemplateView):
+    model = models.Programs
+    template_name = 'programs.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['programs'] = models.Programs.objects.all()
+        return context
+
+
+class ProgramsPageUpdateView(UpdateView):
+    model = models.Programs
+    template_name = 'create.html'
+
+    fields = ["description", "info"]

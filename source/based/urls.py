@@ -19,7 +19,8 @@ from web import views
 
 urlpatterns = [
     path("", views.HomePageView.as_view(), name='home'),
-    path("mailing", views.MailingPageView.as_view(), name='mailing'),
+    path("programs", views.ProgramsPageView.as_view(), name='programs'),
     path("users", views.UsersPageView.as_view(), name='users'),
+    path("<int:pk>/create", views.ProgramsPageUpdateView.as_view(), name='create'),
     path("admin/", admin.site.urls)
 ]

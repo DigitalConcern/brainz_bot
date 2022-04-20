@@ -23,7 +23,7 @@
           <a class="nav-link" href="">Statistics</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active" href="{% url 'users' %}">Users</a>
+          <a class="nav-link" href="{% url 'users' %}">Users</a>
         </li>
         <li class="nav-item">
           <a class="nav-link" href="{% url 'programs' %}">Programs</a>
@@ -33,29 +33,13 @@
   </div>
     </nav>
   <div class="container-fluid">
-    <div>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">Телеграм ID</th>
-            <th scope="col">Кодовое имя</th>
-            <th scope="col">Админ</th>
-            <th scope="col">Имя</th>
-            <th scope="col">Класс</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for user in users %}
-            <tr>
-              <th scope="row"> {{ user.pk }} </th>
-              <th> {{ user.code_name }} </th>
-              <th> {{ user.is_admin }} </th>
-              <th> {{ user.user_name }} </th>
-              <th> {{ user.grade }} </th>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+    <div class="form-floating mb-3">
+      <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
+      <label for="floatingInput">Email address</label>
+    </div>
+    <div class="form-floating">
+      <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
+      <label for="floatingPassword">Password</label>
     </div>
   </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>

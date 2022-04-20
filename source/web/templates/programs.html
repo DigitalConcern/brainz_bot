@@ -27,18 +27,49 @@
           <a class="nav-link" href="{% url 'users' %}">Users</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link active" href="{% url 'mailing' %}">Mailing</a>
+          <a class="nav-link active" href="{% url 'programs' %}">Programs</a>
         </li>
       </ul>
     </div>
   </div>
     </nav>
   <div class="container-fluid">
-    <form action="" method="post">
-      {% csrf_token %}
-      {{ form|crispy }}
-      <button type="submit" class="btn btn-primary">Отправить</button>
-    </form>
+    <div>
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">ID</th>
+            <th scope="col">Номер программы</th>
+            <th scope="col">Описание</th>
+            <th scope="col">Категория</th>
+            <th scope="col">Активна</th>
+          </tr>
+        </thead>
+        <tbody>
+        {% csrf_token %}
+          {% for program in programs %}
+            <tr>
+              <th scope="row"> {{ program.pk }} </th>
+              <th> {{ program.key }} </th>
+              <th>
+                <p>
+                  <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#qq{{ program.pk }}" aria-expanded="false" aria-controls="collapseExample">
+                    {{ program.pk }}
+                  </button>
+                </p>
+                  <div class="collapse" id="qq{{ program.pk }}">
+                    <div class="card card-body">
+                      {{ program.description }}
+                    </div>
+                  </div>
+              </th>
+              <th> {{ program.category }} </th>
+              <th> {{ program.is_active }} </th>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
   </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js" integrity="sha384-QJHtvGhmr9XOIpI6YVutG+2QOK9T+ZnN4kzFN1RtK3zEFEIsxhlmWl5/YESvpZ13" crossorigin="anonymous"></script>

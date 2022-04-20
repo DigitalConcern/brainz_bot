@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-3a^=cu%_+#50gw%@$$^$3v6=-^g5!71f)g0+qi8lh_x3(3n_1f
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["178.216.98.49"]
+ALLOWED_HOSTS = ["178.216.98.49","127.0.0.1"]
 
 
 # Application definition
@@ -38,7 +38,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'web',
-    'bot',
     'crispy_forms',
     'crispy_bootstrap5',
 
@@ -84,7 +83,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': '172.18.0.2',
+        'HOST': "172.18.0.2", # 172.18.0.2
         'PORT': '5432',
     }
 }

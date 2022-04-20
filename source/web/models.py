@@ -1,16 +1,25 @@
 from django.db import models
 
 
-class User(models.Model):
-    tg_id = models.CharField("Telegram User ID", default=0, max_length=255)
-    username = models.CharField("Telegram Username", default=0, max_length=255)
-
-    def __str__(self) -> str:
-        return f"{self.username} - {self.tg_id}"
+# Зарегситрировавшиеся пользователи добавляются в базу данных
+class ActiveUsers(models.Model):
+    user_id = models.IntegerField(primary_key=True)
+    is_admin = models.BooleanField()
+    code_name = models.TextField()
+    user_name = models.TextField()
+    grade = models.TextField()
 
     class Meta:
-        app_label = 'web'
+        db_table = "users"
 
 
-class Comment(models.Model):
-    text = models.CharField("Message text", max_length=1000)
+class Programs(models.Model):
+    id = models.IntegerField(primary_key=True)
+    key = models.IntegerField()
+    description = models.TextField()
+    info = models.TextField()
+    category = models.TextField()
+    is_active = models.BooleanField()
+
+    class Meta:
+        db_table = "programs"

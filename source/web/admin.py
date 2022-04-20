@@ -1,6 +1,6 @@
 from django.contrib import admin
-from . models import User
-from . models import Comment
+from . models import ActiveUsers
+from . models import Programs
 
-admin.site.register(User)
-admin.site.register(Comment)
+admin.site.register(ActiveUsers)
+admin.site.register(Programs)

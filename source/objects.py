@@ -20,7 +20,8 @@ asyncio.set_event_loop(loop)
 class MyServer:
     app = get_asgi_application()
 
-    config = uvicorn.Config(host='0.0.0.0', app=app, loop=loop, port=8080)
+    # config = uvicorn.Config(host='0.0.0.0', app=app, loop=loop, port=8080)
+    config = uvicorn.Config(app=app, loop=loop, port=8001)
     server = uvicorn.Server(config=config)
 
     @classmethod
@@ -43,8 +44,6 @@ class MyServer:
 def run_app():
     server = Process(target=MyServer.run)
     server.start()
-    from bot.main import bot
-    bot.polling(none_stop=True)
 
 
 if __name__ == "__main__":

@@ -4,7 +4,7 @@ from aiogram.types import Message, CallbackQuery, ParseMode, ReplyKeyboardMarkup
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto, LaunchMode
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel
+from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel, Url
 from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions, Programs
@@ -176,6 +176,7 @@ async def smrt_back_is_admin(c: CallbackQuery, button: Button, manager: DialogMa
     else:
         await manager.switch_to(QuestionsSG.choose_user)
 
+
 # Диалог с вопросами
 question_dialog = Dialog(
     Window(
@@ -222,7 +223,8 @@ async def get_data_programs(dialog_manager: DialogManager, **kwargs):
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
         'program_info': dialog_manager.current_context().dialog_data.get("program_info", None),
         'keys_student': list(await Programs.filter(category="students").values_list("key", flat=True)),
-        'keys_school': list(await Programs.filter(category="school").values_list("key", flat=True))
+        'keys_school': list(await Programs.filter(category="school").values_list("key", flat=True)),
+        'link': dialog_manager.current_context().dialog_data.get("link", None),
     }
 
 
@@ -231,6 +233,8 @@ async def on_program_clicked_std(c: ChatEvent, select: Select, manager: DialogMa
     manager.current_context().dialog_data["choose_program"] = item_id
     manager.current_context().dialog_data["program_info"] = "".join(
         await Programs.filter(key=int(item_id), category="students").values_list("info", flat=True))
+    manager.current_context().dialog_data["link"] = "".join(
+        await Programs.filter(key=int(item_id), category="students").values_list("link", flat=True))
     await manager.switch_to(ProgramsSG_std.program_info)
 
 
@@ -239,6 +243,8 @@ async def on_program_clicked_sch(c: ChatEvent, select: Select, manager: DialogMa
     manager.current_context().dialog_data["choose_program"] = item_id
     manager.current_context().dialog_data["program_info"] = "".join(
         await Programs.filter(key=int(item_id), category="school").values_list("info", flat=True))
+    manager.current_context().dialog_data["link"] = "".join(
+        await Programs.filter(key=int(item_id), category="school").values_list("link", flat=True))
     await manager.switch_to(ProgramsSG_sch.program_info)
 
 
@@ -263,6 +269,10 @@ programs_dialog_sch = Dialog(
     ),
     Window(
         Format('{program_info}'),
+        Url(
+            Const("Зарегистрироваться!"),
+            Format('{link}'),
+        ),
         Back(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
@@ -289,6 +299,10 @@ programs_dialog_std = Dialog(
     ),
     Window(
         Format('{program_info}'),
+        Url(
+            Const("Зарегистрироваться!"),
+            Format('{link}'),
+        ),
         Back(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,

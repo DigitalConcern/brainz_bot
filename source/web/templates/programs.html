@@ -33,42 +33,69 @@
     </div>
   </div>
     </nav>
-  <div class="container-fluid">
-    <div>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Номер программы</th>
-            <th scope="col">Описание</th>
-            <th scope="col">Категория</th>
-            <th scope="col">Активна</th>
-          </tr>
-        </thead>
-        <tbody>
-        {% csrf_token %}
-          {% for program in programs %}
-            <tr>
-              <th scope="row"> {{ program.pk }} </th>
-              <th> {{ program.key }} </th>
-              <th>
-                <p>
-                  <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#qq{{ program.pk }}" aria-expanded="false" aria-controls="collapseExample">
-                    {{ program.pk }}
-                  </button>
-                </p>
-                  <div class="collapse" id="qq{{ program.pk }}">
-                    <div class="card card-body">
-                      {{ program.description }}
-                    </div>
+  <div class="position-relative">
+    <div class="my-3 container-fluid">
+      <div class="vstack gap-3 position-absolute top-0 start-50 translate-middle-x">
+      {% for program in programs %}
+        <div class="card" style="width: 18rem;">
+          <div class="card-body">
+            <div class="vstack gap-2">
+              <h5 class="card-title">{{ program.name }}</h5>
+              <div class="accordion accordion-flush" id="accordionFlushExample{{program.pk}}">
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="flush-headingOne{{program.pk}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseOne{{program.pk}}">
+                      Имя программы
+                    </button>
+                  </h2>
+                  <div id="flush-collapseOne{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
+                    <div class="accordion-body">{{ program.name }}</div>
                   </div>
-              </th>
-              <th> {{ program.category }} </th>
-              <th> {{ program.is_active }} </th>
-            </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="flush-headingTwo{{program.pk}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseTwo{{program.pk}}">
+                      Описание
+                    </button>
+                  </h2>
+                  <div id="flush-collapseTwo{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
+                    <div class="accordion-body">{{ program.description }}</div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="flush-headingThree{{program.pk}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseThree{{program.pk}}">
+                      Подробная информация
+                    </button>
+                  </h2>
+                  <div id="flush-collapseThree{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingThree{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
+                    <div class="accordion-body">{{ program.info }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                  Категория
+                </button>
+                <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                  <li><a class="dropdown-item" href="#">Студенты</a></li>
+                  <li><a class="dropdown-item" href="#">Школьники</a></li>
+                </ul>
+              </div>
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" value="" id="flexCheckIndeterminate{{program.pk}}">
+                <label class="form-check-label" for="flexCheckIndeterminate{{program.pk}}">
+                  Активна
+                </label>
+              </div>
+              <button class="btn btn-primary" type="button">
+                Сохранить
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+      </div>
     </div>
   </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>

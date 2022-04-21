@@ -16,6 +16,7 @@ class ActiveUsers(models.Model):
 class Programs(models.Model):
     id = models.IntegerField(primary_key=True)
     key = models.IntegerField()
+    name = models.TextField()
     description = models.TextField()
     info = models.TextField()
     category = models.TextField()

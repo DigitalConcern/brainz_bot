@@ -7,7 +7,7 @@ from tortoise.models import Model
 
 # Зарегситрировавшиеся пользователи добавляются в базу данных
 class ActiveUsers(Model):
-    user_id = fields.IntField(pk=True)
+    user_id = fields.BigIntField(pk=True)
     is_admin = fields.BooleanField()
     code_name = fields.TextField()
     user_name = fields.TextField()

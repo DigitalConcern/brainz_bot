@@ -158,7 +158,8 @@ user_menu_dialog = Dialog(
 async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager):
     count = Counter.get_count()
     name = (await ActiveUsers.filter(user_id=m.from_user.id).values_list("code_name", flat=True))[0]
-    while await Questions.filter(key=count).values_list():
+    while await Questions.filter(key=count).values_list():  # Пока в таблице есть вопрос с таким ключом - генерим его
+        # заново
         count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
     # Если текста нет, значит это фотка
     if m.text is None:

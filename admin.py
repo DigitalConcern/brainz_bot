@@ -45,6 +45,7 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
         'post': dialog_manager.current_context().dialog_data.get("post", None),
         'answer': dialog_manager.current_context().dialog_data.get("answer", None),
         'ticket': dialog_manager.current_context().dialog_data.get("ticket", None),
+        'questioner': dialog_manager.current_context().dialog_data.get("questioner", None),
         'check': dialog_manager.current_context().dialog_data.get("check", None),
         'category': dialog_manager.current_context().dialog_data.get("category", None),
         'photo': dialog_manager.current_context().dialog_data.get("photo", None),
@@ -150,6 +151,9 @@ async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
             manager.current_context().dialog_data["answer"] = m.text.replace(str(i), "")
             # Записываем номер ключа (тикета) в данные состояния
             manager.current_context().dialog_data["ticket"] = str(i)
+            # Записываем имя юзера в данные состояния
+            manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i).values_list(
+                "user_id__code_name", flat=True))[0]
             await manager.dialog().switch_to(AnswerSG.check)
             return
     await MyBot.bot.send_message(m.chat.id, "Вопроса с таким номером не существует")
@@ -181,7 +185,9 @@ answer_dialog = Dialog(
     Window(
         Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
                '<b>Тикет:</b> {ticket}\n'
-               '<b>Ответ:</b> {answer}\n'),
+               '<b>Ответ:</b> {answer}\n'
+               '<b>Получатель:</b> {questioner}\n'
+               ),
         Column(
             Button(Const("Всё верно! ✅"), id="yes", on_click=on_answer_ok_clicked),
             Back(Const("⏪ Назад"))

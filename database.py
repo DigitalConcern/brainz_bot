@@ -18,15 +18,6 @@ class ActiveUsers(Model):
         table = "users"
 
 
-# # Таблица с администраторами
-# # PS мб не нужна
-# class Admins(Model):
-#     user_id = fields.IntField()
-#
-#     class Meta:
-#         table = "admins"
-
-
 # Таблица с вопросами
 class Questions(Model):
     key = fields.TextField(pk=True)
@@ -42,6 +33,7 @@ class Questions(Model):
 class Programs(Model):
     id = fields.BigIntField(pk=True)
     key = fields.IntField()
+    name = fields.TextField()
     description = fields.TextField()
     info = fields.TextField()
     category = fields.TextField()

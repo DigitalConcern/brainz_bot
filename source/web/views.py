@@ -23,6 +23,7 @@ class UsersPageView(TemplateView):
 class ProgramsPageView(TemplateView):
     model = models.Programs
     template_name = 'programs.html'
+    # form_class = forms.CommentForm
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

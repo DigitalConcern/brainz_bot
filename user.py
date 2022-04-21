@@ -160,8 +160,17 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
     name = (await ActiveUsers.filter(user_id=m.from_user.id).values_list("code_name", flat=True))[0]
     while await Questions.filter(key=count).values_list():
         count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
-    await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name, parse_mode="HTML")
-    await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
+    # Если текста нет, значит это фотка
+    if m.text is None:
+        await MyBot.bot.send_photo(CHAT_ID, await MyBot.bot.get_file(m.photo[-1].file_id), f'<b>{str(count)}</b>' + '\n'
+                                   + m.caption + "\nОт: " + name, parse_mode="HTML")
+        await Questions(key=count, user_id_id=m.from_user.id, question=m.caption, is_answered=False).save()
+
+    else:
+        await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name,
+                                     parse_mode="HTML")
+        await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
+
     await MyBot.bot.send_message(m.from_user.id, 'Наш сотрудник уже спешит помочь тебе, ответ придет прямо в бот.')
 
     if (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:

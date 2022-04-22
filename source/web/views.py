@@ -1,3 +1,4 @@
+from django.forms import TextInput
 from django.shortcuts import render
 from django.views.generic import TemplateView, CreateView, UpdateView
 from django.urls import reverse_lazy
@@ -64,7 +65,15 @@ class CreateProgView(CreateView):
     #     return render(self, 'programs/create.html')
 
 
-class ProgramsEditView(CreateView):
+class ProgramsEditView(UpdateView):
     model = models.Programs
-    template_name = "edit_program.html"
+    template_name = "programs/create.html"
     form_class = ProgramForm
+    # fields = ['id', 'key', 'name', 'description']
+    # widgets = {
+    #     "id": TextInput(attrs={'class': 'form-control', 'placeholder': 'ID'}),
+    #     "key": TextInput(attrs={'class': 'form-control', 'placeholder': 'key'}),
+    #     "name": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
+    #     "description": TextInput(attrs={'class': 'form-control', 'placeholder': 'Краткое описание'})
+    # }
+

@@ -22,5 +22,8 @@ class Programs(models.Model):
     category = models.TextField()
     is_active = models.BooleanField()
 
+    def get_absolute_url(self):
+        return '/programs'
+
     class Meta:
         db_table = "programs"

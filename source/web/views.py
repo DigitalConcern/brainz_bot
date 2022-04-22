@@ -20,19 +20,23 @@ class UsersPageView(TemplateView):
         return context
 
 
+# class ProgramsPageView(TemplateView):
+#     model = models.Programs
+#     template_name = 'programs.html'
+#     # form_class = forms.CommentForm
+#
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
+#         context['programs'] = models.Programs.objects.all()
+#         return context
+
+
 class ProgramsPageView(TemplateView):
     model = models.Programs
-    template_name = 'programs.html'
-    # form_class = forms.CommentForm
+    template_name = "programs.html"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['programs'] = models.Programs.objects.all()
+        # context['form'] = forms.ProgramForm
         return context
-
-
-class ProgramsPageUpdateView(UpdateView):
-    model = models.Programs
-    template_name = 'create.html'
-
-    fields = ["description", "info"]

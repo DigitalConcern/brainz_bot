@@ -13,6 +13,8 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+import os
+
 from django.contrib import admin
 from django.urls import path, include
 from web import views
@@ -21,7 +23,7 @@ urlpatterns = [
     path("", views.HomePageView.as_view(), name='home'),
     path("programs", views.ProgramsPageView.as_view(), name='programs'),
     path("users", views.UsersPageView.as_view(), name='users'),
-    path("<int:pk>/create", views.ProgramsPageUpdateView.as_view(), name='create'),
+    # path("<int:pk>/create", views.ProgramsPageUpdateView.as_view(), name='create'),
     path("admin/", admin.site.urls),
-    # path('', include('static'))
+    # path('static/bootstrap-tab.js', 'django.views.static.serve', {'document_root': ''})
 ]

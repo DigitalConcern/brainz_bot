@@ -4,7 +4,8 @@
   <head>
     <script src="https://cdn.jsdelivr.net/npm/easybootstraptabs@1.2.1/dist/easy.bootstrap.tabs.min.js" integrity="sha256-mfgKYr7X+P0ypCBUmpOLfuthFNymYRdvDJ/JTNhNMzs=" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>
-    {% load static %}
+    <script src="http://code.jquery.com/jquery-1.9.1.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
 
     <!-- Required meta tags -->
     <meta charset="utf-8">
@@ -45,11 +46,41 @@
           <div class="card-body">
             <div class="vstack gap-2">
               <h5 class="card-title">{{ program.name }}</h5>
-                     <form action="" method="post">
-                       {% csrf_token %}
-                       {{ form|crispy }}
-                     </form>
-                 <div class="dropdown">
+              <div class="accordion accordion-flush" id="accordionFlushExample{{program.pk}}">
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="flush-headingOne{{program.pk}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseOne{{program.pk}}">
+                      Имя программы
+                    </button>
+                  </h2>
+                  <div id="flush-collapseOne{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
+                    <div class="accordion-body">
+                      fskdjgldkfg
+                    </div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="flush-headingTwo{{program.pk}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseTwo{{program.pk}}">
+                      Описание
+                    </button>
+                  </h2>
+                  <div id="flush-collapseTwo{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
+                    <div class="accordion-body">{{ program.description }}</div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header" id="flush-headingThree{{program.pk}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseThree{{program.pk}}">
+                      Подробная информация
+                    </button>
+                  </h2>
+                  <div id="flush-collapseThree{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingThree{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
+                    <div class="accordion-body">{{ program.info }}</div>
+                  </div>
+                </div>
+              </div>
+              <div class="dropdown">
                 <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
                   Категория
                 </button>

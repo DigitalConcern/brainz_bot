@@ -55,7 +55,10 @@
                   </h2>
                   <div id="flush-collapseOne{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
                     <div class="accordion-body">
-                      fskdjgldkfg
+                      <form method="post" novalidate>
+                        {% csrf_token %}
+                        {{ form.name|as_crispy_field }}
+                      </form>
                     </div>
                   </div>
                 </div>

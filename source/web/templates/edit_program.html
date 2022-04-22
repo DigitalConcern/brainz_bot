@@ -1,4 +1,5 @@
 <!doctype html>
+{% load crispy_forms_tags %}
 <html lang="en">
   <head>
     <!-- Required meta tags -->
@@ -26,20 +27,25 @@
           <a class="nav-link" href="{% url 'users' %}">Users</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="{% url 'programs' %}">Programs</a>
+          <a class="nav-link active" href="{% url 'programs' %}">Programs</a>
         </li>
       </ul>
     </div>
   </div>
     </nav>
-  <div class="container-fluid">
-    <div class="form-floating mb-3">
-      <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-      <label for="floatingInput">Email address</label>
-    </div>
-    <div class="form-floating">
-      <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-      <label for="floatingPassword">Password</label>
+  <div class="position-relative">
+    <div class="my-3 container-fluid">
+      <div class="vstack gap-3 position-absolute top-0 start-50 translate-middle-x">
+        <div class="card">
+          <div class="card-body">
+            <form method="post" novalidate>
+                 {% csrf_token %}
+                 {{ form|crispy }}
+                 <button type="submit" class="btn btn-primary">Отправить</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js" integrity="sha384-7+zCNj/IqJ95wo16oMtfsKbZ9ccEh31eOz1HGyDuCQ6wgnyJNSYdrPa03rtR1zdB" crossorigin="anonymous"></script>

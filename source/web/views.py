@@ -1,8 +1,10 @@
+from django.shortcuts import render
 from django.views.generic import TemplateView, CreateView, UpdateView
 from django.urls import reverse_lazy
 import asyncio
 from . import models
 from . import forms
+from .forms import ProgramForm
 
 
 class HomePageView(TemplateView):
@@ -38,5 +40,31 @@ class ProgramsPageView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['programs'] = models.Programs.objects.all()
-        # context['form'] = forms.ProgramForm
         return context
+
+
+class CreateProgView(CreateView):
+    model = models.Programs
+    template_name = "programs/create.html"
+    fields = ['id', 'key', 'name', 'description']
+
+    # data = {'form': ProgramForm()}
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form'] = ProgramForm
+        return context
+
+    def get_success_url(self) -> str:
+        print("done")
+        return render(self, 'programs/create.html')
+    # def create(self):
+    #     form = ProgramForm()
+    #     data = {'form': form}
+    #     return render(self, 'programs/create.html')
+
+
+class ProgramsEditView(CreateView):
+    model = models.Programs
+    template_name = "edit_program.html"
+    form_class = ProgramForm

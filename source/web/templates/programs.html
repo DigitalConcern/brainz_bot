@@ -45,7 +45,7 @@
                 <div class="accordion-item">
                   <h2 class="accordion-header" id="flush-headingOne{{program.pk}}">
                     <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseOne{{program.pk}}">
-                      Имя программы
+                      Название программы
                     </button>
                   </h2>
                   <div id="flush-collapseOne{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
@@ -90,6 +90,9 @@
               </div>
               <button class="btn btn-primary" type="button" onclick="document.location='programs/{{program.pk}}'">
                 Изменить
+              </button>
+              <button class="btn btn-primary" type="button" onclick="document.location='programs/{{program.pk}}/delete'">
+                Удалить
               </button>
             </div>
           </div>

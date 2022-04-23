@@ -1,11 +1,13 @@
+from django.contrib import messages
 from django.forms import TextInput
-from django.shortcuts import render
-from django.views.generic import TemplateView, CreateView, UpdateView
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 import asyncio
 from . import models
 from . import forms
 from .forms import ProgramForm
+from django.utils.translation import gettext as _
 
 
 class HomePageView(TemplateView):
@@ -69,7 +71,22 @@ class ProgramsEditView(UpdateView):
     model = models.Programs
     template_name = "programs/create.html"
     form_class = ProgramForm
-    # fields = ['id', 'key', 'name', 'description']
+
+    # def get(self, request, *args, **kwargs):
+    #     return super().get(request, *args, **kwargs)
+    #
+    # def post(self, request, *args, **kwargs):
+    #     return super().post(request, *args, **kwargs)
+
+    def form_valid(self, form):
+        # pw = form.cleaned_data["password1"]
+        # if pw != "":
+        #     self.object.set_password(pw)
+        self.object.save()
+        messages.info(self.request, _("Account info saved!"))
+        return redirect("/programs")
+
+        # fields = ['id', 'key', 'name', 'description']
     # widgets = {
     #     "id": TextInput(attrs={'class': 'form-control', 'placeholder': 'ID'}),
     #     "key": TextInput(attrs={'class': 'form-control', 'placeholder': 'key'}),
@@ -77,3 +94,8 @@ class ProgramsEditView(UpdateView):
     #     "description": TextInput(attrs={'class': 'form-control', 'placeholder': 'Краткое описание'})
     # }
 
+
+class ProgramsDeleteView(DeleteView):
+    model = models.Programs
+    template_name = "programs/delete.html"
+    success_url = "/programs"

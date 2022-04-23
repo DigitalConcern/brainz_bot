@@ -80,7 +80,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': "172.18.0.4",  # 172.18.0.4 (В зависимости от кофигурации brainz-net)
+        'HOST': "172.18.0.3",  # 172.18.0.4 (В зависимости от кофигурации brainz-net)
         'PORT': '5432',
     }
 }

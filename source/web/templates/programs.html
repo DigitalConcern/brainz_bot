@@ -75,18 +75,19 @@
               </div>
                <div class="accordion-item">
                   <h2 class="accordion-header" id="flush-headingFour{{program.pk}}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseThree{{program.pk}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFour{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseFour{{program.pk}}">
                       Доп. информация
                     </button>
                   </h2>
-                  <div id="flush-collapseFour{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingThree{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
+                  <div id="flush-collapseFour{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingFour{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
                     <div class="accordion-body">
-                 <p>Категория: </p>
-                <p>{{ program.category }}</p>
-              <p>Активна ли?: </p>
-              <p>{{ program.is_active }}</p>
-              <p>Ссылка: </p>
-              <p>{{ program.link }}</p></div>
+                      <p>Категория: </p>
+                      <p>{{ program.category }}</p>
+                      <p>Активна ли?: </p>
+                      <p>{{ program.is_active }}</p>
+                      <p>Ссылка: </p>
+                      <p>{{ program.link }}</p>
+                    </div>
                   </div>
                 </div>
               </div>

@@ -35,7 +35,7 @@
     </nav>
   <div class="position-relative">
     <div class="my-3 container-fluid">
-      <div class="vstack gap-3 position-absolute top-0 start-50 translate-middle-x">
+      <div class="vstack gap-3 position-relative top-0 start-50 translate-middle-x">
       {% for program in programs %}
         <div class="card" style="width: 18rem;">
           <div class="card-body">
@@ -73,42 +73,27 @@
                   </div>
                 </div>
               </div>
-               <div class="accordion-item">
-                  <h2 class="accordion-header" id="flush-headingFour{{program.pk}}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseFour{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseFour{{program.pk}}">
-                      Доп. информация
-                    </button>
-                  </h2>
-                  <div id="flush-collapseFour{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingFour{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
-                    <div class="accordion-body">
-                      <p>Категория: </p>
-                      <p>{{ program.category }}</p>
-                      <p>Активна ли?: </p>
-                      <p>{{ program.is_active }}</p>
-                      <p>Ссылка: </p>
-                      <p>{{ program.link }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
+              <ul class="list-group">
+                <li class="list-group-item"><p>Категория: {{ program.category }}</p></li>
+                <li class="list-group-item"><p>Ссылка: {{ program.link }}</p></li>
+              </ul>
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="flexCheckIndeterminate{{program.pk}}">
                 <label class="form-check-label" for="flexCheckIndeterminate{{program.pk}}">
                   Активна
                 </label>
               </div>
-              <button class="btn btn-primary" type="button" onclick="document.location='programs/{{program.pk}}'">
+              <button class="btn btn-success" type="button" onclick="document.location='programs/{{program.pk}}'">
                 Изменить
               </button>
-              <button class="btn btn-primary" type="button" onclick="document.location='programs/{{program.pk}}/delete'">
+              <button class="btn btn-warning" type="button" onclick="document.location='programs/{{program.pk}}/delete'">
                 Удалить
               </button>
             </div>
           </div>
         </div>
       {% endfor %}
-        .<a href="{%url 'create' %}"><button class="btn btn-info position-relative top-0 start-50 translate-middle-x ">Добавить программу</button></a>
+        .<a href="{%url 'create' %}"><button class="btn btn-info position-absolute top-0 start-50 translate-middle-x ">Добавить программу</button></a>
       </div>
     </div>
   </div>

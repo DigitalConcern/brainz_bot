@@ -38,6 +38,7 @@ class Programs(Model):
     info = fields.TextField()
     category = fields.TextField()
     is_active = fields.BooleanField()
+    link = fields.TextField()
 
     class Meta:
         table = "programs"

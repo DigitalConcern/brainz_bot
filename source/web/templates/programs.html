@@ -35,47 +35,37 @@
     </nav>
   <div class="position-relative">
     <div class="my-3 container-fluid">
-      <div class="vstack gap-3 position-relative top-0 start-50 translate-middle-x">
+      <div class="vstack gap-3 position-absolute top-0 start-50 translate-middle-x">
       {% for program in programs %}
-        <div class="card" style="width: 18rem;">
+        <div class="card">
           <div class="card-body">
             <div class="vstack gap-2">
               <h5 class="card-title">{{ program.name }}</h5>
-              <div class="accordion accordion-flush" id="accordionFlushExample{{program.pk}}">
+              <div class="accordion" id="accordionExample{{program.pk}}">
                 <div class="accordion-item">
-                  <h2 class="accordion-header" id="flush-headingOne{{program.pk}}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseOne{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseOne{{program.pk}}">
-                      Название программы
-                    </button>
-                  </h2>
-                  <div id="flush-collapseOne{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingOne{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
-                    <div class="accordion-body">{{ program.name }}</div>
-                  </div>
-                </div>
-                <div class="accordion-item">
-                  <h2 class="accordion-header" id="flush-headingTwo{{program.pk}}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseTwo{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseTwo{{program.pk}}">
+                  <h2 class="accordion-header" id="headingTwo{{program.pk}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo{{program.pk}}" aria-expanded="false" aria-controls="collapseTwo{{program.pk}}">
                       Описание
                     </button>
                   </h2>
-                  <div id="flush-collapseTwo{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingTwo{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
+                  <div id="collapseTwo{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="headingTwo{{program.pk}}" data-bs-parent="#accordionExample{{program.pk}}">
                     <div class="accordion-body">{{ program.description }}</div>
                   </div>
                 </div>
                 <div class="accordion-item">
-                  <h2 class="accordion-header" id="flush-headingThree{{program.pk}}">
-                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#flush-collapseThree{{program.pk}}" aria-expanded="false" aria-controls="flush-collapseThree{{program.pk}}">
+                  <h2 class="accordion-header" id="headingThree{{program.pk}}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree{{program.pk}}" aria-expanded="false" aria-controls="collapseThree{{program.pk}}">
                       Подробная информация
                     </button>
                   </h2>
-                  <div id="flush-collapseThree{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="flush-headingThree{{program.pk}}" data-bs-parent="#accordionFlushExample{{program.pk}}">
+                  <div id="collapseThree{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="headingThree{{program.pk}}" data-bs-parent="#accordionExample{{program.pk}}">
                     <div class="accordion-body">{{ program.info }}</div>
                   </div>
                 </div>
               </div>
               <ul class="list-group">
-                <li class="list-group-item"><p>Категория: {{ program.category }}</p></li>
-                <li class="list-group-item"><p>Ссылка: {{ program.link }}</p></li>
+                <li class="list-group-item">Категория: {{ program.category }}</li>
+                <li class="list-group-item">Ссылка: {{ program.link }}</li>
               </ul>
               <div class="form-check">
                 <input class="form-check-input" type="checkbox" value="" id="flexCheckIndeterminate{{program.pk}}">
@@ -93,7 +83,7 @@
           </div>
         </div>
       {% endfor %}
-        .<a href="{%url 'create' %}"><button class="btn btn-info position-absolute top-0 start-50 translate-middle-x ">Добавить программу</button></a>
+        .<a href="{%url 'create' %}"><button class="btn btn-info position-relative top-0 start-50 translate-middle-x ">Добавить программу</button></a>
       </div>
     </div>
   </div>

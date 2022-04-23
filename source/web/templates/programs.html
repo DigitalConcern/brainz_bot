@@ -73,17 +73,21 @@
                   Активна
                 </label>
               </div>
+              <div>
               <button class="btn btn-success" type="button" onclick="document.location='programs/{{program.pk}}'">
                 Изменить
               </button>
               <button class="btn btn-warning" type="button" onclick="document.location='programs/{{program.pk}}/delete'">
                 Удалить
               </button>
+                </div>
             </div>
           </div>
         </div>
       {% endfor %}
-        .<a href="{%url 'create' %}"><button class="btn btn-info position-relative top-0 start-50 translate-middle-x ">Добавить программу</button></a>
+      <div class="position-relative top-0 start-50">
+        <a href="{%url 'create' %}"><button class="btn btn-info translate-middle-x">Добавить программу</button></a>
+      </div>
       </div>
     </div>
   </div>

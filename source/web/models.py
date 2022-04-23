@@ -21,6 +21,7 @@ class Programs(models.Model):
     info = models.TextField()
     category = models.TextField()
     is_active = models.BooleanField()
+    link = models.TextField()
 
     def get_absolute_url(self):
         return '/programs'

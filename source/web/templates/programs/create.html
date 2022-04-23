@@ -36,16 +36,38 @@
 
 
   <div class="position-relative">
-    <div class="my-3 container-fluid">
-      <div class="vstack gap-3 position-absolute top-0 start-50 translate-middle-x">
+    <div class="my-3 container-md">
+      <div class="vstack gap-3 position-relative top-0 start-50 translate-middle-x">
         <div class="card">
           <div class="card-body">
             <form method="post">
               {% csrf_token %}
-              {{form.id}}<br>
-              {{form.key}}<br>
-              {{form.name}}<br>
-              {{form.description}}<br>
+              <div class="form-floating mb-3">
+                {{form.name}}
+                <label>Название</label>
+              </div>
+                            <div class="form-floating mb-3">
+                {{form.description}}
+                <label>Описание</label>
+              </div>
+                            <div class="form-floating mb-3">
+                {{form.info}}
+                <label>Подробно</label>
+              </div>
+              <div class="form-floating mb-3">
+                {{form.link}}
+                <label>Ссылка</label>
+              </div>
+              <div class="form-floating mb-3">
+              {{form.category}}
+                <label>Категория</label>
+                </div>
+              <div class="form-floating mb-3">
+              <div class="form-check form-switch">
+                {{form.is_active}}
+                <label>Активна?</label>
+              </div>
+                </div>
               <button type="submit" class="btn btn-success">Отправить</button>
             </form>
           </div>

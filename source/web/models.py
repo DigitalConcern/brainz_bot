@@ -14,7 +14,7 @@ class ActiveUsers(models.Model):
 
 
 class Programs(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.BigAutoField(primary_key=True)
     key = models.IntegerField()
     name = models.TextField()
     description = models.TextField()

@@ -27,5 +27,4 @@ urlpatterns = [
     path("programs/<int:pk>/delete", views.ProgramsDeleteView.as_view(), name='delete'),
     path("programs/create", views.CreateProgView.as_view(), name='create'),
     path("admin/", admin.site.urls),
-    # path('static/bootstrap-tab.js', 'django.views.static.serve', {'document_root': ''})
 ]

@@ -36,6 +36,17 @@
   <div class="position-relative">
     <div class="my-3 container-md">
       <div class="vstack gap-3 position-relative top-0 start-50 translate-middle-x">
+        {% if messages %}
+          <ul class="messages">
+              {% for message in messages %}
+            <div class="alert alert-primary d-flex align-items-center" role="alert">
+                <div>
+                  {{ message }}
+                </div>
+              </div>
+              {% endfor %}
+          </ul>
+          {% endif %}
       {% for program in programs %}
         <div class="card">
           <div class="card-body">
@@ -64,15 +75,29 @@
                 </div>
               </div>
               <ul class="list-group">
-                <li class="list-group-item">Категория: {{ program.category }}</li>
-                <li class="list-group-item">Ссылка: {{ program.link }}</li>
+                {% if program.category == "school" %}
+                <li class="list-group-item">Категория: Школьники</li>
+                {% else %}
+                <li class="list-group-item">Категория: Студенты</li>
+                {% endif %}
+                <li class="list-group-item">
+                <a href="{{ program.link }}" class="stretched-link">{{ program.link }}</a>
+                </li>
               </ul>
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" value="" id="flexCheckIndeterminate{{program.pk}}">
-                <label class="form-check-label" for="flexCheckIndeterminate{{program.pk}}">
-                  Активна
-                </label>
-              </div>
+                {% if program.is_active %}
+                 <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckDisabled" checked disabled>
+                  <label class="form-check-label" for="flexSwitchCheckDisabled">Активна</label>
+                </div>
+                {% else %}
+                 <div class="form-check form-switch">
+                  <input class="form-check-input" type="checkbox" role="switch" id="flexSwitchCheckCheckedDisabled"  disabled>
+                  <label class="form-check-label" for="flexSwitchCheckCheckedDisabled">Не активна</label>
+                </div>
+                {% endif %}
+
+
+
               <div>
               <button class="btn btn-success" type="button" onclick="document.location='programs/{{program.pk}}'">
                 Изменить

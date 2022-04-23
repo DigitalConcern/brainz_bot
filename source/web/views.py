@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.forms import TextInput
+from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views.generic import TemplateView, CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
@@ -49,7 +50,7 @@ class ProgramsPageView(TemplateView):
 class CreateProgView(CreateView):
     model = models.Programs
     template_name = "programs/create.html"
-    fields = ['id', 'key', 'name', 'description']
+    fields = ['name', 'description', 'info', 'category', 'is_active', 'link']
 
     # data = {'form': ProgramForm()}
 
@@ -57,6 +58,21 @@ class CreateProgView(CreateView):
         context = super().get_context_data(**kwargs)
         context['form'] = ProgramForm
         return context
+
+    def form_valid(self, form):
+        elem = models.Programs()
+        elem.key = len(
+            models.Programs.objects.filter(category=form.cleaned_data["category"]).values_list("id", flat=True)) + 1
+        elem.name = form.cleaned_data["name"]
+        prg_name=elem.name
+        elem.link = form.cleaned_data["link"]
+        elem.description = form.cleaned_data["description"]
+        elem.info = form.cleaned_data["info"]
+        elem.is_active = form.cleaned_data["is_active"]
+        elem.category = form.cleaned_data["category"]
+        elem.save()
+        messages.info(self.request, _("Программа "+prg_name+" успешно сохранена!"))
+        return redirect("/programs")
 
     def get_success_url(self) -> str:
         print("done")
@@ -79,11 +95,29 @@ class ProgramsEditView(UpdateView):
     #     return super().post(request, *args, **kwargs)
 
     def form_valid(self, form):
-        # pw = form.cleaned_data["password1"]
-        # if pw != "":
-        #     self.object.set_password(pw)
-        self.object.save()
-        messages.info(self.request, _("Account info saved!"))
+        elem = models.Programs()
+        elem.id = self.object.id
+        elem.key = len(models.Programs.objects.filter(category=form.cleaned_data["category"])) + 1
+        elem.name = form.cleaned_data["name"]
+        prg_name = elem.name
+        elem.link = form.cleaned_data["link"]
+        elem.description = form.cleaned_data["description"]
+        elem.info = form.cleaned_data["info"]
+        elem.is_active = form.cleaned_data["is_active"]
+        elem.category = form.cleaned_data["category"]
+
+        elem.save()
+        i = 1
+        for elem in models.Programs.objects.filter(category="school"):
+            elem.key = i
+            i += 1
+            elem.save()
+        i = 1
+        for elem in models.Programs.objects.filter(category="students"):
+            elem.key = i
+            i += 1
+            elem.save()
+        messages.info(self.request, _("Программа "+prg_name+" успешно изменена!"))
         return redirect("/programs")
 
         # fields = ['id', 'key', 'name', 'description']
@@ -99,3 +133,17 @@ class ProgramsDeleteView(DeleteView):
     model = models.Programs
     template_name = "programs/delete.html"
     success_url = "/programs"
+
+    def form_valid(self, form):
+        self.object = self.get_object()
+        old_category = self.object.category
+        prg_name = self.object.name
+        success_url = self.get_success_url()
+        self.object.delete()
+        i = 1
+        for elem in models.Programs.objects.filter(category=old_category):
+            elem.key = i
+            i += 1
+            elem.save()
+        messages.info(self.request, _("Программа "+ prg_name+ " успешно удалена!"))
+        return HttpResponseRedirect(success_url)

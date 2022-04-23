@@ -109,6 +109,7 @@ async def start(m: Message, dialog_manager: DialogManager):
     except:
         pass
 
+
     if await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin"):
         await dialog_manager.start(RootAdminSG.root_admin, mode=StartMode.RESET_STACK)
         # Если админ

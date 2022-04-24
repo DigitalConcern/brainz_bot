@@ -35,7 +35,7 @@
     </nav>
     <div class="container-md">
       {% if messages %}
-      <ul class="pt-3 messages">
+      <ul class="pt-3 px-3 messages">
         {% for message in messages %}
         <div class="alert alert-primary d-flex align-items-center" role="alert">
             <div>
@@ -45,7 +45,7 @@
         {% endfor %}
       </ul>
       {% endif %}
-      <div class="py-3 vstack gap-3 col-md-8 mx-auto position-absolute top-10 bottom-10 start-50 translate-middle-x">
+      <div class="py-3 container-md vstack gap-3 md position-absolute top-10 bottom-10 start-50 translate-middle-x">
       {% for program in programs %}
         <div class="card">
           <div class="card-body">

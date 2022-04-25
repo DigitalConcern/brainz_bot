@@ -1,5 +1,5 @@
 from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.types import Message, CallbackQuery, ParseMode, ReplyKeyboardMarkup, KeyboardButton
+from aiogram.types import Message, CallbackQuery, ParseMode
 
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto, LaunchMode
@@ -7,9 +7,9 @@ from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel, Url
 from aiogram_dialog.widgets.text import Const, Format
 
-from database import ActiveUsers, Questions, Programs
+from bot.database import ActiveUsers, Questions, Programs
 from bot import MyBot
-from config import Counter, NameCounter, CHAT_ID
+from bot.config import Counter, NameCounter, CHAT_ID
 
 
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
@@ -112,8 +112,7 @@ class ProgramsSG_sch(StatesGroup):
 
 # Класс состояний диалога вопросов
 class QuestionsSG(StatesGroup):
-    choose_user = State()
-    choose_admin = State()
+    choose = State()
     faq = State()
     ask = State()
 
@@ -134,7 +133,7 @@ user_menu_dialog = Dialog(
                "а если у тебя появились вопросы, то задать их команде Brainz."),
         Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG_std.choose_program),
         Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG_sch.choose_program),
-        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.choose_user),
+        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.choose),
         parse_mode=ParseMode.HTML,
         # getter=get_data_user,
         state=UserSG.menu
@@ -144,13 +143,13 @@ user_menu_dialog = Dialog(
                "а если у тебя появились вопросы, то задать их команде Brainz."),
         Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG_std.choose_program),
         Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG_sch.choose_program),
-        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.choose_admin),
+        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.choose),
         Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,
         # getter=get_data_user,
         state=UserSG.admin_menu
     ),
-    launch_mode=LaunchMode.STANDARD
+    launch_mode=LaunchMode.SINGLE_TOP
 )
 
 
@@ -173,18 +172,12 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
         await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
 
     await MyBot.bot.send_message(m.from_user.id, 'Наш сотрудник уже спешит помочь тебе, ответ придет прямо в бот.')
+    await manager.done()
 
     if (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:
-        await manager.start(UserSG.admin_menu, mode=StartMode.RESET_STACK)
+        await manager.start(UserSG.admin_menu)
     else:
         await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
-
-
-async def smrt_back_is_admin(c: CallbackQuery, button: Button, manager: DialogManager):
-    if (await ActiveUsers.filter(user_id=c.from_user.id).values_list("is_admin", flat=True))[0]:
-        await manager.switch_to(QuestionsSG.choose_admin)
-    else:
-        await manager.switch_to(QuestionsSG.choose_user)
 
 
 # Диалог с вопросами
@@ -195,27 +188,19 @@ question_dialog = Dialog(
         SwitchTo(Const("Всё равно задать вопрос."), id="ask", state=QuestionsSG.ask),
         Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,
-        state=QuestionsSG.choose_user
-
-    ),
-    Window(
-        Format("Прежде, чем отправить вопрос, убедись, пожалуйста, что ответа нет в FAQ."),
-        SwitchTo(Const("Ответы на частые вопросы"), id="faq", state=QuestionsSG.faq),
-        Cancel(Const("⏪ Назад")),
-        parse_mode=ParseMode.HTML,
-        state=QuestionsSG.choose_admin
+        state=QuestionsSG.choose
 
     ),
     Window(
         Const("Здесь будут часто ответы на часто задаваемые вопросы!"),
-        Button(Const("⏪ Назад"), id="smrt_back_faq", on_click=smrt_back_is_admin),
+        Back(Const("⏪ Назад")),
         state=QuestionsSG.faq
     ),
     Window(
         Const("Отправь в бот сообщение с вопросом – мы перешлем его сотруднику (но только одно, если у тебя появятся "
               "новые вопросы, заново перейди по кнопке из меню)"),
         MessageInput(quest_handler),
-        Button(Const("⏪ Назад"), id="smrt_back_ask", on_click=smrt_back_is_admin),
+        Back(Const("⏪ Назад")),
         state=QuestionsSG.ask
     ),
     launch_mode=LaunchMode.SINGLE_TOP

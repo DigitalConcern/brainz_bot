@@ -1,17 +1,15 @@
 from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.types import Message, CallbackQuery, ParseMode
+from aiogram.types import Message
 
-from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
+from aiogram_dialog import Dialog, DialogManager, Window, StartMode
 from aiogram_dialog.manager.protocols import LaunchMode
-from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Select, Back, Column, Start, Cancel
-from aiogram_dialog.widgets.text import Const, Format
+from aiogram_dialog.widgets.kbd import Start
+from aiogram_dialog.widgets.text import Const
 
-from database import ActiveUsers, Questions, Programs
+from bot.database import ActiveUsers
 from bot import MyBot
-from config import CHAT_ID
 from user import UserSG, RegistrationSG
-from admin import AdminSG
+from bot.admin import AdminSG
 
 
 class RootAdminSG(StatesGroup):

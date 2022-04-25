@@ -101,7 +101,7 @@ async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogMa
                                            caption=manager.current_context().dialog_data["post"])
     await MyBot.bot.send_message(CHAT_ID, "Пост отправлен")
     await manager.done()
-    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+    await manager.start(AdminSG.admin, mode=StartMode.NORMAL)
 
 
 # Ветка с постом
@@ -159,7 +159,7 @@ async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
             return
     await MyBot.bot.send_message(m.chat.id, "Вопроса с таким номером не существует")
     await manager.done()
-    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+    await manager.start(AdminSG.admin, mode=StartMode.NORMAL)
 
 
 # Обрабатываем сообщение о подтверждении ответа на вопрос
@@ -172,7 +172,7 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
     await MyBot.bot.send_message(c.from_user.id, "Ответ отправлен")
     await manager.done()
-    await manager.bg().done()
+    await manager.start(AdminSG.admin, mode=StartMode.NORMAL)
 
 
 # Ветка с ответом на вопрос

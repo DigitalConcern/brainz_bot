@@ -224,16 +224,29 @@ question_dialog = Dialog(
 
 # функция для получения данных из состояний
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
+    # Достаем из базы тексты всех программ
+    programs_students = list(await Programs.filter(category="students").order_by("key").values_list("description", flat=True))
+    names_students = list(await Programs.filter(category="students").order_by("key").values_list("name", flat=True))
+    keys_students = list(await Programs.filter(category="students").order_by("key").values_list("key", flat=True))
+    programs_school = list(await Programs.filter(category="school").order_by("key").values_list("description", flat=True))
+    names_school = list(await Programs.filter(category="school").order_by("key").values_list("name", flat=True))
+    keys_school = list(await Programs.filter(category="school").order_by("key").values_list("key", flat=True))
+    preview_students = ''
+    preview_school = ''
+
+    for i in range(len(programs_students)):
+        preview_students += f'<b>{keys_students[i]}. {names_students[i]}</b>\n{programs_students[i]}\n\n'
+
+    for i in range(len(programs_school)):
+        preview_school = f'<b>{keys_school[i]}. {names_school[i]}</b>\n{programs_school[i]}\n\n'
+
     return {
-        # Достаем из базы тексты всех программ
-        'programs_list_student': "\n\n".join(
-            await Programs.filter(category="students").values_list("description", flat=True)),
-        'programs_list_school': "\n\n".join(
-            await Programs.filter(category="school").values_list("description", flat=True)),
+        'programs_list_student': preview_students,
+        'programs_list_school': preview_school,
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
         'program_info': dialog_manager.current_context().dialog_data.get("program_info", None),
-        'keys_student': list(await Programs.filter(category="students").values_list("key", flat=True)),
-        'keys_school': list(await Programs.filter(category="school").values_list("key", flat=True)),
+        'keys_students': keys_students,
+        'keys_school': keys_school,
         'link': dialog_manager.current_context().dialog_data.get("link", None),
     }
 
@@ -296,7 +309,7 @@ programs_dialog_std = Dialog(
         Format("{programs_list_student}"),
         Row(Select(
             Format("{item}"),
-            items="keys_student",
+            items="keys_students",
             item_id_getter=lambda x: x,
             id="grades",
             on_click=on_program_clicked_std
@@ -323,11 +336,3 @@ programs_dialog_std = Dialog(
 
 # Регистрируем диалоги
 MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog_sch, programs_dialog_std, question_dialog)
-
-#                "<b>4. ВВЕДЕНИЕ В ЯЗЫК JAVA И ПЛАТФОРМУ РАЗРАБОТКИ</b>\n"
-#                "Самые передовые практики и современные инструменты в мире корпоративной разработки на Java."
-#                " Эксперты и инженеры-практики по разработке и архитектуре ПО\n\n"
-#                "<b>5. Кейс-лаборатория КРОК</b>\n"
-#                "Закрой практику в университете, решая кейс под реальный бизнес-запрос. "
-#                "Тебя ждут 12 недель командной работы под руководством наставников\n\n"
-#                "<b>КЛИКАЙ НА КНОПКИ чтобы узнать подробнее</b>"

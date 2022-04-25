@@ -33,6 +33,13 @@
     </div>
   </div>
     </nav>
+
+    <style type="text/css">
+      .accordion-body {
+        white-space: pre-wrap;
+      }
+    </style>
+
     <div class="container-md">
       {% if messages %}
       <ul class="pt-3 px-3 messages">
@@ -69,7 +76,7 @@
                     </button>
                   </h2>
                   <div id="collapseThree{{program.pk}}" class="accordion-collapse collapse" aria-labelledby="headingThree{{program.pk}}" data-bs-parent="#accordionExample{{program.pk}}">
-                    <div class="accordion-body">{% autoescape off %} {{ program.info }} {% endautoescape %}</div>
+                    <div class="accordion-body ">{% autoescape off %} {{ program.info }} {% endautoescape %}</div>
                   </div>
                 </div>
               </div>

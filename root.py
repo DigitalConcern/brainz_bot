@@ -6,10 +6,10 @@ from aiogram_dialog.manager.protocols import LaunchMode
 from aiogram_dialog.widgets.kbd import Start
 from aiogram_dialog.widgets.text import Const
 
-from bot.database import ActiveUsers
+from database import ActiveUsers
 from bot import MyBot
 from user import UserSG, RegistrationSG
-from bot.admin import AdminSG
+from admin import AdminSG
 
 
 class RootAdminSG(StatesGroup):

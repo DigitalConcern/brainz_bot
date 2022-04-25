@@ -7,9 +7,9 @@ from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel, Url
 from aiogram_dialog.widgets.text import Const, Format
 
-from bot.database import ActiveUsers, Questions, Programs
+from database import ActiveUsers, Questions, Programs
 from bot import MyBot
-from bot.config import Counter, NameCounter, CHAT_ID
+from config import Counter, NameCounter, CHAT_ID
 
 
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы

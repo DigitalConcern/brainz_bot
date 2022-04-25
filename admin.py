@@ -7,7 +7,7 @@ from aiogram.types import Message, CallbackQuery, ParseMode, ContentType
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
 from aiogram_dialog.manager.protocols import LaunchMode
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Select, Back, Column, Start, Cancel
+from aiogram_dialog.widgets.kbd import Button, Select, Back, Column, Start, Cancel, Url
 from aiogram_dialog.widgets.media import StaticMedia
 from aiogram_dialog.widgets.text import Const, Format
 

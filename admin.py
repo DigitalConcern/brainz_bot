@@ -58,7 +58,7 @@ async def admin(m: Message, dialog_manager: DialogManager):
     await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
-MyBot.register_handler(method=admin, text="/admin", state="*")
+MyBot.register_handler(method=admin, commands=["admin"])
 
 # Корневой диалог админа
 menu_admin_dialog = Dialog(
@@ -70,7 +70,7 @@ menu_admin_dialog = Dialog(
         Cancel(Const("⏪ Назад")),
         state=AdminSG.admin
     ),
-    launch_mode=LaunchMode.SINGLE_TOP
+    launch_mode=LaunchMode.STANDARD
 )
 
 
@@ -200,5 +200,3 @@ answer_dialog = Dialog(
     launch_mode=LaunchMode.SINGLE_TOP
 )
 
-# Регистрируем все диалоги
-MyBot.register_dialogs(menu_admin_dialog, answer_dialog, post_dialog)

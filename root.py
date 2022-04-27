@@ -8,8 +8,8 @@ from aiogram_dialog.widgets.text import Const
 
 from database import ActiveUsers
 from bot import MyBot
-from user import UserSG, RegistrationSG
-from admin import AdminSG
+from user import UserSG, RegistrationSG, registration_dialog, user_menu_dialog,  programs_dialog_sch, programs_dialog_std, question_dialog
+from admin import AdminSG, menu_admin_dialog, answer_dialog, post_dialog
 
 
 class RootAdminSG(StatesGroup):
@@ -17,7 +17,7 @@ class RootAdminSG(StatesGroup):
 
 
 async def start(m: Message, dialog_manager: DialogManager):
-    if await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin"):
+    if ((await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin"))[0])[0]:
         await dialog_manager.start(RootAdminSG.root_admin, mode=StartMode.RESET_STACK)
         # Если админ
     elif not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
@@ -47,5 +47,8 @@ root_admin_dialog = Dialog(
 )
 
 # Регистрируем хэндлер start
-MyBot.register_handler(method=start, text="/start", state="*")
+MyBot.register_handler(method=start, commands=["start"])
 MyBot.register_dialogs(root_admin_dialog)
+# Регистрируем все диалоги
+MyBot.register_dialogs(menu_admin_dialog, answer_dialog, post_dialog)
+MyBot.register_dialogs(registration_dialog, user_menu_dialog,  programs_dialog_sch, programs_dialog_std, question_dialog)

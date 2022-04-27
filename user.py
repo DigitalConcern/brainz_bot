@@ -88,7 +88,8 @@ registration_dialog = Dialog(
         )),
         Back(Const("⏪ Назад")),
         state=RegistrationSG.choose_grade
-    )
+    ),
+    launch_mode=LaunchMode.SINGLE_TOP
 )
 
 
@@ -162,7 +163,7 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
         count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
     # Если текста нет, значит это фотка
     if m.text is None:
-        await MyBot.bot.send_photo(CHAT_ID, await MyBot.bot.get_file(m.photo[-1].file_id), f'<b>{str(count)}</b>' + '\n'
+        await MyBot.bot.send_photo(CHAT_ID, (await MyBot.bot.get_file(m.photo[-1].file_id)).file_id, caption=f'<b>{str(count)}</b>' + '\n'
                                    + m.caption + "\nОт: " + name, parse_mode="HTML")
         await Questions(key=count, user_id_id=m.from_user.id, question=m.caption, is_answered=False).save()
 
@@ -199,7 +200,7 @@ question_dialog = Dialog(
     Window(
         Const("Отправь в бот сообщение с вопросом – мы перешлем его сотруднику (но только одно, если у тебя появятся "
               "новые вопросы, заново перейди по кнопке из меню)"),
-        MessageInput(quest_handler),
+        MessageInput(quest_handler, content_types=["text", "photo"]),
         Back(Const("⏪ Назад")),
         state=QuestionsSG.ask
     ),
@@ -318,6 +319,3 @@ programs_dialog_std = Dialog(
     ),
     launch_mode=LaunchMode.SINGLE_TOP
 )
-
-# Регистрируем диалоги
-MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog_sch, programs_dialog_std, question_dialog)

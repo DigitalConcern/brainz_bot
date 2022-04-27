@@ -49,5 +49,5 @@ class UserForm(forms.ModelForm):
             "code_name": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
             "user_name": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
             "grade": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
-            "is_active": CheckboxInput(attrs={'class': 'form-check-input', 'role': 'switch'}),
+            "is_admin": CheckboxInput(attrs={'class': 'form-check-input', 'role': 'switch'}),
         }

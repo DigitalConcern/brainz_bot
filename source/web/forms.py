@@ -1,7 +1,7 @@
 from crispy_forms.helper import FormHelper
 from crispy_forms.bootstrap import Accordion, AccordionGroup
 from django import forms
-from django.forms import TextInput, Textarea, ChoiceField,Select,CheckboxInput
+from django.forms import TextInput, Textarea, ChoiceField, Select, CheckboxInput
 from django.shortcuts import render
 
 from . import models
@@ -32,8 +32,22 @@ class ProgramForm(forms.ModelForm):
             "description": Textarea(attrs={'class': 'form-control', 'style': 'height: 100px', 'placeholder': 'Краткое '
                                                                                                              'описание'}),
             "info": Textarea(attrs={'class': 'form-control', 'style': 'height: 200px', 'placeholder': 'q'}),
-            "category": Select(attrs={'class': 'form-select'}  , choices=(('students', 'Студенты'), ('school', 'Школьники'))),
-            "is_active": CheckboxInput(attrs={'class': 'form-check-input','role': 'switch'}),
+            "category": Select(attrs={'class': 'form-select'},
+                               choices=(('students', 'Студенты'), ('school', 'Школьники'))),
+            "is_active": CheckboxInput(attrs={'class': 'form-check-input', 'role': 'switch'}),
             "link": TextInput(attrs={'class': 'form-control', 'placeholder': 'r'}),
 
+        }
+
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = models.ActiveUsers
+        fields = ['user_id', 'code_name', 'user_name', 'grade', 'is_admin']
+        widgets = {
+            "user_id": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
+            "code_name": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
+            "user_name": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
+            "grade": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
+            "is_active": CheckboxInput(attrs={'class': 'form-check-input', 'role': 'switch'}),
         }

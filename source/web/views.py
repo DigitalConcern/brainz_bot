@@ -7,7 +7,7 @@ from django.urls import reverse_lazy
 import asyncio
 from . import models
 from . import forms
-from .forms import ProgramForm
+from .forms import ProgramForm, UserForm
 from django.utils.translation import gettext as _
 
 
@@ -64,14 +64,14 @@ class CreateProgView(CreateView):
         elem.key = len(
             models.Programs.objects.filter(category=form.cleaned_data["category"]).values_list("id", flat=True)) + 1
         elem.name = form.cleaned_data["name"]
-        prg_name=elem.name
+        prg_name = elem.name
         elem.link = form.cleaned_data["link"]
         elem.description = form.cleaned_data["description"]
         elem.info = form.cleaned_data["info"]
         elem.is_active = form.cleaned_data["is_active"]
         elem.category = form.cleaned_data["category"]
         elem.save()
-        messages.info(self.request, _("Программа "+prg_name+" успешно сохранена!"))
+        messages.info(self.request, _("Программа " + prg_name + " успешно сохранена!"))
         return redirect("/programs")
 
     def get_success_url(self) -> str:
@@ -117,7 +117,7 @@ class ProgramsEditView(UpdateView):
             elem.key = i
             i += 1
             elem.save()
-        messages.info(self.request, _("Программа "+prg_name+" успешно изменена!"))
+        messages.info(self.request, _("Программа " + prg_name + " успешно изменена!"))
         return redirect("/programs")
 
         # fields = ['id', 'key', 'name', 'description']
@@ -145,5 +145,12 @@ class ProgramsDeleteView(DeleteView):
             elem.key = i
             i += 1
             elem.save()
-        messages.info(self.request, _("Программа "+ prg_name+ " успешно удалена!"))
+        messages.info(self.request, _("Программа " + prg_name + " успешно удалена!"))
         return HttpResponseRedirect(success_url)
+
+
+class UsersEditView(UpdateView):
+    model = models.ActiveUsers
+    template_name = "users_edit.html"
+    form_class = UserForm
+

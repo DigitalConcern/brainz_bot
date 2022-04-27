@@ -8,6 +8,8 @@ class ActiveUsers(models.Model):
     code_name = models.TextField()
     user_name = models.TextField()
     grade = models.TextField()
+    def get_absolute_url(self):
+        return '/users'
 
     class Meta:
         db_table = "users"

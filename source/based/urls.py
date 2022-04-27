@@ -27,4 +27,6 @@ urlpatterns = [
     path("programs/<int:pk>/delete", views.ProgramsDeleteView.as_view(), name='delete'),
     path("programs/create", views.CreateProgView.as_view(), name='create'),
     path("admin/", admin.site.urls),
+    path("users/<int:pk>", views.UsersEditView.as_view(), name='update2'),
+
 ]

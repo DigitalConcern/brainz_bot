@@ -2,9 +2,9 @@
 
 echo "Migrate the Database at startup of project"
 
-python source/manage.py makemigrations
+python /app/source/manage.py makemigrations
 # Wait for few minute and run db migraiton
-while ! python source/manage.py migrate  2>&1; do
+while ! python /app/source/manage.py migrate  2>&1; do
    echo "Migration is in progress status"
    sleep 3
 done

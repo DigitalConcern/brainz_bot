@@ -8,9 +8,14 @@ COPY . ./app
 RUN apk update  && pip install -r /app/requirements.txt --no-cache-dir
 # Устанавливаем приложение (Подробнее смотри Distutils)
 #RUN pip install -e /app
+RUN chmod +x /app/docker-entrypoint.sh
+ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
+
 CMD python /app/source/manage.py makemigrations
 CMD python /app/source/manage.py migrate
-#CMD python /app/source/objects.py
+CMD python /app/source/objects.py
+
+
 # Говорим контейнеру какой порт слушай
 EXPOSE 8080
 # Запуск нашего приложения при старте контейнера

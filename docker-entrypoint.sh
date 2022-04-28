@@ -10,3 +10,5 @@ while ! python /app/source/manage.py migrate  2>&1; do
 done
 
 echo "Django docker is fully configured successfully."
+
+exec "$@"

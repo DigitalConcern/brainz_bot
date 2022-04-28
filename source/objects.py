@@ -19,8 +19,8 @@ asyncio.set_event_loop(loop)
 class MyServer:
     app = get_asgi_application()
 
-    config = uvicorn.Config(host='0.0.0.0', app=app, loop=loop, port=8080)
-    # config = uvicorn.Config(app=app, loop=loop, port=8001)
+    # config = uvicorn.Config(host='0.0.0.0', app=app, loop=loop, port=8080)
+    config = uvicorn.Config(app=app, loop=loop, port=8001)
     server = uvicorn.Server(config=config)
 
     @classmethod
@@ -41,17 +41,17 @@ class MyServer:
 
 
 def run_app():
-    # from django.contrib.auth.models import User
-    # from sesame import utils
-    # from web import models
-    # email = "den"
-    # user = User.objects.get(username=email)
-    # login_token = utils.get_parameters(user)
-    # login_link = "http://127.0.0.1:8001/?sesame={}".format(login_token["sesame"])
-    # print(login_link)
-    # newlink = models.Links()
-    # newlink.link = login_link
-    # newlink.save()
+    from django.contrib.auth.models import User
+    from sesame import utils
+    from web import models
+    email = "den"
+    user = User.objects.get(username=email)
+    login_token = utils.get_parameters(user)
+    login_link = "http://127.0.0.1:8001/?sesame={}".format(login_token["sesame"])
+    print(login_link)
+    newlink = models.Links()
+    newlink.link = login_link
+    newlink.save()
 
     server = Process(target=MyServer.run)
     server.start()

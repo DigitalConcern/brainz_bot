@@ -16,6 +16,46 @@ from bot import MyBot
 from config import CHAT_ID, categories
 from user import UserSG
 
+from aiogram.dispatcher.filters.state import StatesGroup, State
+from aiogram.types import Message
+
+from aiogram_dialog import Dialog, DialogManager, Window, StartMode
+from aiogram_dialog.manager.protocols import LaunchMode
+from aiogram_dialog.widgets.kbd import Start
+from aiogram_dialog.widgets.text import Const
+
+from database import ActiveUsers
+from bot import MyBot
+from user import UserSG, RegistrationSG, registration_dialog, user_menu_dialog, programs_dialog_sch, \
+    programs_dialog_std, question_dialog
+
+
+async def start(m: Message, dialog_manager: DialogManager):
+    if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
+        await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
+        # Если его нет в базе, то предлагаем зарегистрироваться
+        dialog_manager.current_context().dialog_data["id"] = m.from_user.id
+    elif (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:
+        await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+        # Если админ
+    else:
+        await MyBot.bot.send_message(m.from_user.id, f'Привет, '
+                                                     f'<b>{"".join((await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0])}!</b>',
+                                     parse_mode="HTML")
+        # Если он есть то переходим в меню
+        await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
+        dialog_manager.current_context().dialog_data["name"] = \
+            (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]
+        dialog_manager.current_context().dialog_data["grade"] = \
+            (await ActiveUsers.filter(user_id=m.from_user.id).values_list("grade"))[0]
+
+
+# Регистрируем хэндлер start
+MyBot.register_handler(method=start, commands=["start"])
+# Регистрируем все диалоги
+
+MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog_sch, programs_dialog_std, question_dialog)
+
 
 # В данном файле находится интерфейс админа
 
@@ -51,17 +91,18 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
         'photo': dialog_manager.current_context().dialog_data.get("photo", None),
     }
 
+
 # Корневой диалог админа
 menu_admin_dialog = Dialog(
     Window(
         Const("Выбери действие 🤔"),
         Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
+        Start(Const("Я хочу побыть юзером! ✉️"), id="uss", state=UserSG.admin_menu),
         Url(Const("Изменить информацию ℹ️"), Const("http://178.216.98.49/programs")),
-        Start(Const("⏪ Назад")),
         state=AdminSG.admin
     ),
-    launch_mode=LaunchMode.STANDARD
+    launch_mode=LaunchMode.ROOT
 )
 
 
@@ -191,3 +232,4 @@ answer_dialog = Dialog(
     launch_mode=LaunchMode.SINGLE_TOP
 )
 
+MyBot.register_dialogs(menu_admin_dialog, answer_dialog, post_dialog)

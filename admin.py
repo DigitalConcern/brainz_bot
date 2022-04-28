@@ -51,15 +51,6 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
         'photo': dialog_manager.current_context().dialog_data.get("photo", None),
     }
 
-
-# Хендлер на команду /admin
-async def admin(m: Message, dialog_manager: DialogManager):
-    await MyBot.bot.send_message(m.chat.id, "Hello, admin!")
-    await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
-
-
-MyBot.register_handler(method=admin, commands=["admin"])
-
 # Корневой диалог админа
 menu_admin_dialog = Dialog(
     Window(

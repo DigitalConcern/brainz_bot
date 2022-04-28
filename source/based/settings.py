@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.0/ref/settings/
 """
 import os
 from pathlib import Path
+# from web import models
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -38,7 +39,6 @@ INSTALLED_APPS = [
     'web',
     'crispy_forms',
     'crispy_bootstrap5',
-
 ]
 
 MIDDLEWARE = [
@@ -51,6 +51,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'sesame.middleware.AuthenticationMiddleware'
 ]
+
+AUTH_USER_MODEL = 'web.ActiveUsers'
 
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
@@ -86,7 +88,7 @@ DATABASES = {
         'NAME': 'postgres',
         'USER': 'postgres',
         'PASSWORD': 'postgres',
-        'HOST': "172.18.0.3",  # 172.18.0.4 (В зависимости от кофигурации brainz-net)
+        'HOST': "brainz-pg",  # 172.18.0.4 (В зависимости от кофигурации brainz-net)
         'PORT': '5432',
     }
 }

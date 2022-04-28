@@ -41,18 +41,6 @@ class MyServer:
 
 
 def run_app():
-    from django.contrib.auth.models import User
-    from sesame import utils
-    from web import models
-    email = "den"
-    user = User.objects.get(username=email)
-    login_token = utils.get_parameters(user)
-    login_link = "http://127.0.0.1:8001/?sesame={}".format(login_token["sesame"])
-    print(login_link)
-    newlink = models.Links()
-    newlink.link = login_link
-    newlink.save()
-
     server = Process(target=MyServer.run)
     server.start()
 

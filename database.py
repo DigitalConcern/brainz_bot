@@ -4,6 +4,7 @@ from tortoise.models import Model
 
 # Классы ORM
 
+
 # Зарегситрировавшиеся пользователи добавляются в базу данных
 class ActiveUsers(Model):
     user_id = fields.BigIntField(pk=True)

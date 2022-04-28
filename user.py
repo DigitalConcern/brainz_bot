@@ -29,7 +29,7 @@ async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogMa
     manager.current_context().dialog_data["grade"] = "12"
     while await ActiveUsers.filter(code_name=count).values_list():
         count = NameCounter.get_count()
-    await ActiveUsers(user_id=manager.current_context().dialog_data["id"],
+    await ActiveUsers(user_id=с.from_user.id,
                       is_admin=False,
                       code_name=count,
                       user_name=c.from_user.first_name,
@@ -46,7 +46,7 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
     manager.current_context().dialog_data["grade"] = item_id
     while await ActiveUsers.filter(code_name=count).values_list():
         count = NameCounter.get_count()
-    await ActiveUsers(user_id=manager.current_context().dialog_data["id"],
+    await ActiveUsers(user_id=с.from_user.id,
                       is_admin=False,
                       code_name=count,
                       user_name=c.from_user.first_name,

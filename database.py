@@ -12,6 +12,7 @@ class ActiveUsers(Model):
     code_name = fields.TextField()
     user_name = fields.TextField()
     grade = fields.TextField()
+    link = fields.TextField(null=True)
     questions: fields.ReverseRelation["Questions"]
 
     class Meta:
@@ -53,7 +54,7 @@ async def run():
                     "engine": "tortoise.backends.asyncpg",
                     "credentials": {
                         "database": "postgres",
-                        "host": "172.18.0.3", # 172.18.0.2(В зависимости от настроек brainz-net)
+                        "host": "brainz-pg", # 172.18.0.2(В зависимости от настроек brainz-net)
                         "password": "postgres",
                         "port": 5432,
                         "user": "postgres"

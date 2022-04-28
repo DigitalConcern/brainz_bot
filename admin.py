@@ -29,6 +29,8 @@ from bot import MyBot
 from user import UserSG, RegistrationSG, registration_dialog, user_menu_dialog, programs_dialog_sch, \
     programs_dialog_std, question_dialog
 
+user_id = 0
+
 
 async def start(m: Message, dialog_manager: DialogManager):
     if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
@@ -36,8 +38,11 @@ async def start(m: Message, dialog_manager: DialogManager):
         # Если его нет в базе, то предлагаем зарегистрироваться
         dialog_manager.current_context().dialog_data["id"] = m.from_user.id
     elif (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:
+        global user_id
+        user_id = m.from_user.id
         await dialog_manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
         # Если админ
+        dialog_manager.current_context().dialog_data["id"] = user_id
     else:
         await MyBot.bot.send_message(m.from_user.id, f'Привет, '
                                                      f'<b>{"".join((await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0])}!</b>',
@@ -81,7 +86,10 @@ class PostSG(StatesGroup):
 
 # функция для получения данных из состояний
 async def get_data(dialog_manager: DialogManager, **kwargs):
+    global user_id
+    link = await ActiveUsers.filter(user_id=user_id).values_list("link", flat=True)
     return {
+        'id': dialog_manager.current_context().dialog_data.get("id", None),
         'post': dialog_manager.current_context().dialog_data.get("post", None),
         'answer': dialog_manager.current_context().dialog_data.get("answer", None),
         'ticket': dialog_manager.current_context().dialog_data.get("ticket", None),
@@ -89,6 +97,7 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
         'check': dialog_manager.current_context().dialog_data.get("check", None),
         'category': dialog_manager.current_context().dialog_data.get("category", None),
         'photo': dialog_manager.current_context().dialog_data.get("photo", None),
+        'link': link
     }
 
 
@@ -98,9 +107,10 @@ menu_admin_dialog = Dialog(
         Const("Выбери действие 🤔"),
         Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
-        Start(Const("Я хочу побыть юзером! ✉️"), id="uss", state=UserSG.admin_menu),
-        Url(Const("Изменить информацию ℹ️"), Const("http://178.216.98.49/programs")),
-        state=AdminSG.admin
+        Start(Const("Я хочу побыть юзером! 😈"), id="uss", state=UserSG.admin_menu),
+        Url(Const("Изменить информацию ℹ️"), Format("{link}")),
+        state=AdminSG.admin,
+        getter=get_data
     ),
     launch_mode=LaunchMode.ROOT
 )
@@ -161,7 +171,8 @@ post_dialog = Dialog(
     ),
     Window(
         Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
-               '<b>Пост:</b> {post}\n'
+               '<b>Пост:</b> {post}\n',
+               'Категория: {category}'
                ),
         Column(
             Button(Const("Всё верно! ✅"), id="yes", on_click=on_post_ok_clicked),

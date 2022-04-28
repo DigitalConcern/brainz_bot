@@ -9,6 +9,7 @@ from tortoise.models import Model
 class ActiveUsers(Model):
     user_id = fields.BigIntField(pk=True)
     is_admin = fields.BooleanField()
+    password = fields.TextField()
     code_name = fields.TextField()
     user_name = fields.TextField()
     grade = fields.TextField()

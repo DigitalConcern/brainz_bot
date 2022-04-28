@@ -32,6 +32,7 @@ async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogMa
     await ActiveUsers(user_id=c.from_user.id,
                       is_admin=False,
                       code_name=count,
+                      password="",
                       user_name=c.from_user.first_name,
                       grade="12"
                       ).save()
@@ -49,6 +50,7 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
     await ActiveUsers(user_id=c.from_user.id,
                       is_admin=False,
                       code_name=count,
+                      password="",
                       user_name=c.from_user.first_name,
                       grade=manager.current_context().dialog_data["grade"]
                       ).save()

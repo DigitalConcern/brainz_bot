@@ -87,7 +87,7 @@ class PostSG(StatesGroup):
 # функция для получения данных из состояний
 async def get_data(dialog_manager: DialogManager, **kwargs):
     global user_id
-    link = await ActiveUsers.filter(user_id=user_id).values_list("link", flat=True)
+    link = (await ActiveUsers.filter(user_id=user_id).values_list("link", flat=True))[0]
     return {
         'id': dialog_manager.current_context().dialog_data.get("id", None),
         'post': dialog_manager.current_context().dialog_data.get("post", None),

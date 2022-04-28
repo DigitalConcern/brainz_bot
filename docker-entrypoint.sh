@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 
 echo "Migrate the Database at startup of project"
 

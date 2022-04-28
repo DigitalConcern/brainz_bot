@@ -17,13 +17,13 @@ class RootAdminSG(StatesGroup):
 
 
 async def start(m: Message, dialog_manager: DialogManager):
-    if (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:
-        await dialog_manager.start(RootAdminSG.root_admin, mode=StartMode.RESET_STACK)
-        # Если админ
-    elif not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
+    if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
         await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
         # Если его нет в базе, то предлагаем зарегистрироваться
         dialog_manager.current_context().dialog_data["id"] = m.from_user.id
+    elif (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:
+        await dialog_manager.start(RootAdminSG.root_admin, mode=StartMode.RESET_STACK)
+        # Если админ
     else:
         await MyBot.bot.send_message(m.from_user.id, f'Привет, '
                                                      f'<b>{"".join((await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0])}!</b>',

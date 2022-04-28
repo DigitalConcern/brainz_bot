@@ -29,6 +29,7 @@ class MyServer:
         asyncio.run(cls.server.serve())
         # asyncio.run(cls.on_shutdown())
 
+
     # @staticmethod
     # async def on_startup() -> None:
     #     InjectMiddleware.inject_params = dict(bot=MyBot.bot)

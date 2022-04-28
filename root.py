@@ -17,7 +17,7 @@ class RootAdminSG(StatesGroup):
 
 
 async def start(m: Message, dialog_manager: DialogManager):
-    if ((await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin"))[0])[0]:
+    if (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:
         await dialog_manager.start(RootAdminSG.root_admin, mode=StartMode.RESET_STACK)
         # Если админ
     elif not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):

@@ -154,3 +154,7 @@ class UsersEditView(UpdateView):
     template_name = "users_edit.html"
     form_class = UserForm
 
+class UsersDelView(DeleteView):
+    model = models.ActiveUsers
+    template_name = "users_delete.html"
+    success_url = "/users"

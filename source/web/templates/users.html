@@ -55,6 +55,9 @@
                <th><button class="btn btn-success" type="button" onclick="document.location='/users/{{user.pk}}'">
                 Изменить
               </button></th>
+                <th><button class="btn btn-warning" type="button" onclick="document.location='/users/{{user.pk}}/delete'">
+                Удалить
+              </button></th>
             </tr>
           {% endfor %}
         </tbody>

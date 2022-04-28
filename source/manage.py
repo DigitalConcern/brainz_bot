@@ -16,9 +16,18 @@ def main():
             "forget to activate a virtual environment?"
         ) from exc
 
-    from objects import MyServer, run_app
-    MyServer.run()
+    from objects import MyServer
+    # MyServer.run()
+
+    from objects import run_app
     run_app()
+
+    execute_from_command_line(sys.argv)
+
+    # from objects import MyServer, run_app
+    #
+    # MyServer.run()
+    # run_app()
 
 
 if __name__ == "__main__":

@@ -4,6 +4,7 @@ from django.db import models
 # Зарегситрировавшиеся пользователи добавляются в базу данных
 class ActiveUsers(models.Model):
     user_id = models.IntegerField(primary_key=True)
+    password= models.TextField()
     is_admin = models.BooleanField()
     code_name = models.TextField()
     user_name = models.TextField()
@@ -30,3 +31,9 @@ class Programs(models.Model):
 
     class Meta:
         db_table = "programs"
+
+class Links(models.Model):
+    link = models.TextField()
+
+    class Meta:
+        db_table = "links"

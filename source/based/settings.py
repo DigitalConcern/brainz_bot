@@ -49,6 +49,12 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'sesame.middleware.AuthenticationMiddleware'
+]
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "sesame.backends.ModelBackend",
 ]
 
 ROOT_URLCONF = 'based.urls'
@@ -79,8 +85,8 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'postgres',
         'USER': 'postgres',
-        'PASSWORD': 'postgres',
-        'HOST': "172.18.0.3",  # 172.18.0.4 (В зависимости от кофигурации brainz-net)
+        'PASSWORD': '1234',
+        'HOST': "localhost",  # 172.18.0.4 (В зависимости от кофигурации brainz-net)
         'PORT': '5432',
     }
 }
@@ -127,3 +133,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 CRISPY_ALLOWED_TEMPLATE_PACKS = "bootstrap5"
 CRISPY_TEMPLATE_PACK = "bootstrap5"
+
+

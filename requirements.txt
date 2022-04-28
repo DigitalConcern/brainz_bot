@@ -5,3 +5,4 @@ psycopg2
 asyncpg
 crispy-bootstrap5
 django-crispy-forms
+django-sesame

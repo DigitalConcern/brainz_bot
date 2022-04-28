@@ -1,6 +1,7 @@
 #!/bin/bash
 
 echo "Migrate the Database at startup of project"
+
 python source/manage.py makemigrations
 # Wait for few minute and run db migraiton
 while ! python source/manage.py migrate  2>&1; do

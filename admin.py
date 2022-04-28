@@ -58,7 +58,7 @@ menu_admin_dialog = Dialog(
         Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
         Url(Const("Изменить информацию ℹ️"), Const("http://178.216.98.49/programs")),
-        Cancel(Const("⏪ Назад")),
+        Start(Const("⏪ Назад")),
         state=AdminSG.admin
     ),
     launch_mode=LaunchMode.STANDARD

@@ -8,12 +8,12 @@ COPY . ./app
 RUN apk update  && pip install -r /app/requirements.txt --no-cache-dir
 # Устанавливаем приложение (Подробнее смотри Distutils)
 #RUN pip install -e /app
-#RUN chmod +x /app/docker-entrypoint.sh
-#CMD /app/docker-entrypoint.sh
+RUN chmod +x /app/docker-entrypoint.sh
+ENTRYPOINT [ "/app/docker-entrypoint.sh" ]
 
-RUN python /app/source/manage.py makemigrations
-RUN python /app/source/manage.py migrate
-CMD python /app/source/objects.py
+#RUN python /app/source/manage.py makemigrations
+#RUN python /app/source/manage.py migrate
+#CMD python /app/source/objects.py
 
 
 # Говорим контейнеру какой порт слушай

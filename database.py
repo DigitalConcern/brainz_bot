@@ -55,7 +55,7 @@ async def run():
                     "engine": "tortoise.backends.asyncpg",
                     "credentials": {
                         "database": "postgres",
-                        "host": "localhost", # 172.18.0.2(В зависимости от настроек brainz-net)
+                        "host": "brainz-pg", # 172.18.0.2(В зависимости от настроек brainz-net)
                         "password": "postgres",
                         "port": 5432,
                         "user": "postgres"

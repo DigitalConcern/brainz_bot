@@ -108,7 +108,7 @@ menu_admin_dialog = Dialog(
         Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
         Start(Const("Я хочу побыть юзером! 😈"), id="uss", state=UserSG.admin_menu),
-        # Url(Const("Изменить информацию ℹ️"), Format("{link}")),
+        Url(Const("Изменить информацию ℹ️"), Format("{link}")),
         state=AdminSG.admin,
         getter=get_data
     ),

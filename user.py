@@ -33,6 +33,7 @@ async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogMa
                       password=None,
                       is_admin=False,
                       code_name=count,
+                      password="",
                       user_name=c.from_user.first_name,
                       grade="12",
                       link=None
@@ -52,6 +53,7 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
                       is_admin=False,
                       password=None,
                       code_name=count,
+                      password="",
                       user_name=c.from_user.first_name,
                       grade=manager.current_context().dialog_data["grade"],
                       link=None

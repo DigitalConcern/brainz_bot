@@ -1,7 +1,6 @@
 import asyncio
 from bot import MyBot
 from database import loop_db
-import root
 import user
 import admin
 

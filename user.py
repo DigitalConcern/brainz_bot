@@ -30,10 +30,12 @@ async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogMa
     while await ActiveUsers.filter(code_name=count).values_list():
         count = NameCounter.get_count()
     await ActiveUsers(user_id=c.from_user.id,
+                      password=None,
                       is_admin=False,
                       code_name=count,
                       user_name=c.from_user.first_name,
-                      grade="12"
+                      grade="12",
+                      link=None
                       ).save()
     await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
     await manager.done()
@@ -48,9 +50,11 @@ async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager,
         count = NameCounter.get_count()
     await ActiveUsers(user_id=c.from_user.id,
                       is_admin=False,
+                      password=None,
                       code_name=count,
                       user_name=c.from_user.first_name,
-                      grade=manager.current_context().dialog_data["grade"]
+                      grade=manager.current_context().dialog_data["grade"],
+                      link=None
                       ).save()
     await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
     await manager.done()

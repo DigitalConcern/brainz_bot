@@ -9,6 +9,7 @@ from tortoise.models import Model
 class ActiveUsers(Model):
     user_id = fields.BigIntField(pk=True)
     is_admin = fields.BooleanField()
+    password = fields.TextField(null=True)
     code_name = fields.TextField()
     user_name = fields.TextField()
     grade = fields.TextField()
@@ -54,7 +55,7 @@ async def run():
                     "engine": "tortoise.backends.asyncpg",
                     "credentials": {
                         "database": "postgres",
-                        "host": "brainz-pg", # 172.18.0.2(В зависимости от настроек brainz-net)
+                        "host": "localhost", # 172.18.0.2(В зависимости от настроек brainz-net)
                         "password": "postgres",
                         "port": 5432,
                         "user": "postgres"

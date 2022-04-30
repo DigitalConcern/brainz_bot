@@ -27,7 +27,7 @@ class RegistrationSG(StatesGroup):
 async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
     count = NameCounter.get_count()
     manager.current_context().dialog_data["grade"] = "12"
-    while await ActiveUsers.filter(code_name=count).values_list():
+    while await ActiveUsers.filter(code_name=count).all():
         count = NameCounter.get_count()
     await ActiveUsers(user_id=c.from_user.id,
                       password=None,
@@ -46,7 +46,7 @@ async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogMa
 async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
     count = NameCounter.get_count()
     manager.current_context().dialog_data["grade"] = item_id
-    while await ActiveUsers.filter(code_name=count).values_list():
+    while await ActiveUsers.filter(code_name=count).all():
         count = NameCounter.get_count()
     await ActiveUsers(user_id=c.from_user.id,
                       is_admin=False,

@@ -17,13 +17,10 @@ categories = {
 
 
 # Класс для формирования кодовых имен
-class NameCounter:
-    TOKEN = 10
-
+class Names:
     @classmethod
-    def get_count(cls):
-        Counter.TOKEN = Counter.TOKEN + 1
-        return str("#" + random.choice(stuff)) + cls.TOKEN.__str__()
+    def get_name(cls):
+        return str("#" + random.choice(stuff)) + str(random.randint(1, 5000))
 
 
 # Класс для формирования номеров вопросов

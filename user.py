@@ -9,7 +9,7 @@ from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions, Programs
 from bot import MyBot
-from config import Counter, NameCounter, CHAT_ID
+from config import Counter, Names, CHAT_ID
 
 
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
@@ -25,38 +25,42 @@ class RegistrationSG(StatesGroup):
 
 # Если студент нажал кнопку "студент"
 async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
-    count = NameCounter.get_count()
     manager.current_context().dialog_data["grade"] = "12"
-    while await ActiveUsers.filter(code_name=count).all():
-        count = NameCounter.get_count()
+
+    name = Names.get_name()
+    while await ActiveUsers.filter(code_name=name).exists():
+        name = Names.get_name()
+
     await ActiveUsers(user_id=c.from_user.id,
                       password=None,
                       is_admin=False,
-                      code_name=count,
+                      code_name=name,
                       user_name=c.from_user.first_name,
                       grade="12",
                       link=None
                       ).save()
-    await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
+    await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Вы зарегистрированы 🎉")
     await manager.done()
     await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
 
 # Выбор класса обучения (для школьников)
 async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
-    count = NameCounter.get_count()
     manager.current_context().dialog_data["grade"] = item_id
-    while await ActiveUsers.filter(code_name=count).all():
-        count = NameCounter.get_count()
+
+    name = Names.get_name()
+    while await ActiveUsers.filter(code_name=name).exists():
+        name = Names.get_name()
+
     await ActiveUsers(user_id=c.from_user.id,
                       is_admin=False,
                       password=None,
-                      code_name=count,
+                      code_name=name,
                       user_name=c.from_user.first_name,
                       grade=manager.current_context().dialog_data["grade"],
                       link=None
                       ).save()
-    await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
+    await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Вы зарегистрированы 🎉")
     await manager.done()
     await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
@@ -177,10 +181,10 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
         await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
 
     await MyBot.bot.send_message(m.from_user.id, 'Наш сотрудник уже спешит помочь тебе, ответ придет прямо в бот.')
-    await manager.done()
 
     if (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:
-        await manager.start(UserSG.admin_menu)
+        await manager.done()
+        await manager.start(UserSG.admin_menu, mode=StartMode.NORMAL)
     else:
         await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
@@ -190,7 +194,7 @@ question_dialog = Dialog(
     Window(
         Format("Прежде, чем отправить вопрос, убедись, пожалуйста, что ответа нет в FAQ."),
         SwitchTo(Const("Ответы на частые вопросы"), id="faq", state=QuestionsSG.faq),
-        SwitchTo(Const("Всё равно задать вопрос."), id="ask", state=QuestionsSG.ask),
+        SwitchTo(Const("Всё равно задать вопрос"), id="ask", state=QuestionsSG.ask),
         Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,
         state=QuestionsSG.choose

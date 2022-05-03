@@ -1,20 +1,12 @@
-import os
+from aiogram.types import CallbackQuery, ParseMode
 
-from aiogram import types
-from aiogram.dispatcher.filters.state import StatesGroup, State
-from aiogram.types import Message, CallbackQuery, ParseMode, ContentType
-
-from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
-from aiogram_dialog.manager.protocols import LaunchMode
+from aiogram_dialog import ChatEvent
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Select, Back, Column, Start, Cancel, Url
-from aiogram_dialog.widgets.media import StaticMedia
-from aiogram_dialog.widgets.text import Const, Format
+from aiogram_dialog.widgets.kbd import Button, Select, Back, Column, Cancel, Url
+from aiogram_dialog.widgets.text import Format
 
-from database import ActiveUsers, Questions
-from bot import MyBot
-from config import CHAT_ID, categories
-from user import UserSG
+from database import Questions
+from config import categories
 
 from aiogram.dispatcher.filters.state import StatesGroup, State
 from aiogram.types import Message
@@ -97,6 +89,7 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
         'check': dialog_manager.current_context().dialog_data.get("check", None),
         'category': dialog_manager.current_context().dialog_data.get("category", None),
         'photo': dialog_manager.current_context().dialog_data.get("photo", None),
+        'is_answered': dialog_manager.current_context().dialog_data.get("is_answered", ""),
         'link': link
     }
 
@@ -141,9 +134,9 @@ async def on_post_ok_clicked(c: CallbackQuery, button: Button, manager: DialogMa
             else:
                 await MyBot.bot.send_photo(chel, manager.current_context().dialog_data["photo"].file_id,
                                            caption=manager.current_context().dialog_data["post"])
-    await MyBot.bot.send_message(CHAT_ID, "Пост отправлен")
+    await MyBot.bot.send_message(c.from_user.id, "Пост отправлен")
     await manager.done()
-    await manager.start(AdminSG.admin, mode=StartMode.NORMAL)
+    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
 # Ветка с постом
@@ -171,8 +164,8 @@ post_dialog = Dialog(
     ),
     Window(
         Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
-               '<b>Пост:</b> {post}\n',
-               'Категория: {category}'
+               '<b>Пост:</b> {post}\n'
+               '<b>Категория:</b> {category}'
                ),
         Column(
             Button(Const("Всё верно! ✅"), id="yes", on_click=on_post_ok_clicked),
@@ -188,21 +181,21 @@ post_dialog = Dialog(
 
 async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
     # Находим в Бд все ключи вопросов и проверяем содержатся ли они в сообщении
-    for i in await Questions.filter().values_list("key",
-                                                  flat=True):
-        if m.text.find(str(i)) != -1:
+    for i in await Questions.filter().values_list("key", "is_answered"):
+        if m.text.find(str(i[0])) != -1:
+            if i[1]:
+                manager.current_context().dialog_data["is_answered"] = "На этот вопрос уже поступал ответ"
             # Заменяем ключ вопроса в сообщении ответа на пустую строку
-            manager.current_context().dialog_data["answer"] = m.text.replace(str(i), "")
+            manager.current_context().dialog_data["answer"] = m.text.replace(str(i[0]), "")
             # Записываем номер ключа (тикета) в данные состояния
-            manager.current_context().dialog_data["ticket"] = str(i)
+            manager.current_context().dialog_data["ticket"] = str(i[0])
             # Записываем имя юзера в данные состояния
-            manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i).values_list(
+            manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i[0]).values_list(
                 "user_id__code_name", flat=True))[0]
             await manager.dialog().switch_to(AnswerSG.check)
             return
     await MyBot.bot.send_message(m.chat.id, "Вопроса с таким номером не существует")
-    await manager.done()
-    await manager.start(AdminSG.admin, mode=StartMode.NORMAL)
+    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
 # Обрабатываем сообщение о подтверждении ответа на вопрос
@@ -215,7 +208,7 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
     await MyBot.bot.send_message(c.from_user.id, "Ответ отправлен")
     await manager.done()
-    await manager.start(AdminSG.admin, mode=StartMode.NORMAL)
+    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
 # Ветка с ответом на вопрос
@@ -228,7 +221,7 @@ answer_dialog = Dialog(
     ),
     Window(
         Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
-               '<b>Тикет:</b> {ticket}\n'
+               '<b>Тикет:</b> {ticket} <i>{is_answered}</i>\n'
                '<b>Ответ:</b> {answer}\n'
                '<b>Получатель:</b> {questioner}\n'
                ),

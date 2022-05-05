@@ -111,12 +111,14 @@ class UserSG(StatesGroup):
 class ProgramsSG_std(StatesGroup):
     choose_program = State()
     program_info = State()
+    faq = State()
 
 
 # Класс состояний программ
 class ProgramsSG_sch(StatesGroup):
     choose_program = State()
     program_info = State()
+    faq = State()
 
 
 # Класс состояний диалога вопросов
@@ -171,8 +173,9 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
         count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
     # Если текста нет, значит это фотка
     if m.text is None:
-        await MyBot.bot.send_photo(CHAT_ID, (await MyBot.bot.get_file(m.photo[-1].file_id)).file_id, caption=f'<b>{str(count)}</b>' + '\n'
-                                   + m.caption + "\nОт: " + name, parse_mode="HTML")
+        await MyBot.bot.send_photo(CHAT_ID, (await MyBot.bot.get_file(m.photo[-1].file_id)).file_id,
+                                   caption=f'<b>{str(count)}</b>' + '\n'
+                                           + m.caption + "\nОт: " + name, parse_mode="HTML")
         await Questions(key=count, user_id_id=m.from_user.id, question=m.caption, is_answered=False).save()
 
     else:
@@ -219,10 +222,12 @@ question_dialog = Dialog(
 # функция для получения данных из состояний
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     # Достаем из базы тексты всех программ
-    programs_students = list(await Programs.filter(category="students").order_by("key").values_list("description", flat=True))
+    programs_students = list(
+        await Programs.filter(category="students").order_by("key").values_list("description", flat=True))
     names_students = list(await Programs.filter(category="students").order_by("key").values_list("name", flat=True))
     keys_students = list(await Programs.filter(category="students").order_by("key").values_list("key", flat=True))
-    programs_school = list(await Programs.filter(category="school").order_by("key").values_list("description", flat=True))
+    programs_school = list(
+        await Programs.filter(category="school").order_by("key").values_list("description", flat=True))
     names_school = list(await Programs.filter(category="school").order_by("key").values_list("name", flat=True))
     keys_school = list(await Programs.filter(category="school").order_by("key").values_list("key", flat=True))
     preview_students = ''

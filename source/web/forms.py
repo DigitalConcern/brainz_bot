@@ -26,12 +26,13 @@ from crispy_forms.layout import Field, Layout
 class ProgramForm(forms.ModelForm):
     class Meta:
         model = models.Programs
-        fields = ['name', 'description', 'info', 'category', 'is_active', 'link']
+        fields = ['name', 'description', 'info', 'faq', 'category', 'is_active', 'link']
         widgets = {
             "name": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
             "description": Textarea(attrs={'class': 'form-control', 'style': 'height: 100px', 'placeholder': 'Краткое '
                                                                                                              'описание'}),
             "info": Textarea(attrs={'class': 'form-control', 'style': 'height: 200px', 'placeholder': 'q'}),
+            "faq": Textarea(attrs={'class': 'form-control', 'style': 'height: 200px', 'placeholder': 'q'}),
             "category": Select(attrs={'class': 'form-select'},
                                choices=(('students', 'Студенты'), ('school', 'Школьники'))),
             "is_active": CheckboxInput(attrs={'class': 'form-check-input', 'role': 'switch'}),

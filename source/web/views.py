@@ -51,7 +51,7 @@ class ProgramsPageView(TemplateView):
 class CreateProgView(CreateView):
     model = models.Programs
     template_name = "programs/create.html"
-    fields = ['name', 'description', 'info', 'category', 'is_active', 'link']
+    fields = ['name', 'description', 'info', 'faq', 'category', 'is_active', 'link']
 
     # data = {'form': ProgramForm()}
 
@@ -69,6 +69,7 @@ class CreateProgView(CreateView):
         elem.link = form.cleaned_data["link"]
         elem.description = form.cleaned_data["description"]
         elem.info = form.cleaned_data["info"]
+        elem.faq = form.cleaned_data["faq"]
         elem.is_active = form.cleaned_data["is_active"]
         elem.category = form.cleaned_data["category"]
         elem.save()

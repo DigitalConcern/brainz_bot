@@ -212,7 +212,7 @@ question_dialog = Dialog(
         Const("Отправь в бот сообщение с вопросом – мы перешлем его сотруднику (но только одно, если у тебя появятся "
               "новые вопросы, заново перейди по кнопке из меню)"),
         MessageInput(quest_handler, content_types=["text", "photo"]),
-        Back(Const("⏪ Назад")),
+        Cancel(Const("⏪ Назад")),
         state=QuestionsSG.ask
     ),
     launch_mode=LaunchMode.SINGLE_TOP

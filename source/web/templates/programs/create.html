@@ -68,16 +68,16 @@
                 <label>Категория</label>
                 </div>
               <div class="form-floating mb-3">
-              <div class="form-check form-switch">
-                {{form.is_active}}
-                <label>Активна?</label>
-              </div>
+                <div class="form-check form-switch">
+                  {{form.is_active}}
+                  <label>Активна?</label>
                 </div>
-              <button type="submit" class="btn btn-success">Отправить</button>
+              </div>
+              <div>
+                <button type="submit" class="btn btn-success">Сохранить</button>
+                <button class="btn btn-warning" type="button" onclick="document.location='/programs'">Отменить</button>
+              </div>
             </form>
-            <button class="btn btn-success" type="button" onclick="document.location='programs'">
-              Отменить
-            </button>
           </div>
         </div>
       </div>

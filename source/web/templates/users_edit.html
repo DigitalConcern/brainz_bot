@@ -63,11 +63,11 @@
                 <label>Админ?</label>
                 {{form.is_admin}}
               </div>
-              <button type="submit" class="btn btn-success">Отправить</button>
+              <div>
+                <button type="submit" class="btn btn-success">Сохранить</button>
+                <button class="btn btn-warning" type="button" onclick="document.location='/users'">Отменить</button>
+              </div>
             </form>
-            <button class="btn btn-success" type="button" onclick="document.location='users'">
-              Отменить
-            </button>
           </div>
         </div>
       </div>

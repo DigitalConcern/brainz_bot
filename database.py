@@ -37,6 +37,7 @@ class Programs(Model):
     key = fields.IntField()
     name = fields.TextField()
     description = fields.TextField()
+    faq = fields.TextField()
     info = fields.TextField()
     category = fields.TextField()
     is_active = fields.BooleanField()

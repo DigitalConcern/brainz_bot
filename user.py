@@ -242,6 +242,7 @@ async def get_data_programs(dialog_manager: DialogManager, **kwargs):
         'keys_students': keys_students,
         'keys_school': keys_school,
         'link': dialog_manager.current_context().dialog_data.get("link", None),
+        'faq': dialog_manager.current_context().dialog_data.get("faq", None)
     }
 
 
@@ -249,9 +250,14 @@ async def on_program_clicked_std(c: ChatEvent, select: Select, manager: DialogMa
     # Реализовано через БД
     manager.current_context().dialog_data["choose_program"] = item_id
     manager.current_context().dialog_data["program_info"] = "".join(
-        await Programs.filter(key=int(item_id), category="students").values_list("info", flat=True))
+        await Programs.filter(key=int(item_id), category="students").values_list("info", flat=True)
+    )
     manager.current_context().dialog_data["link"] = "".join(
-        await Programs.filter(key=int(item_id), category="students").values_list("link", flat=True))
+        await Programs.filter(key=int(item_id), category="students").values_list("link", flat=True)
+    )
+    manager.current_context().dialog_data["faq"] = "".join(
+        await Programs.filter(key=int(item_id), category="students").values_list("faq", flat=True)
+    )
     await manager.switch_to(ProgramsSG_std.program_info)
 
 
@@ -259,9 +265,14 @@ async def on_program_clicked_sch(c: ChatEvent, select: Select, manager: DialogMa
     # Реализовано через БД
     manager.current_context().dialog_data["choose_program"] = item_id
     manager.current_context().dialog_data["program_info"] = "".join(
-        await Programs.filter(key=int(item_id), category="school").values_list("info", flat=True))
+        await Programs.filter(key=int(item_id), category="school").values_list("info", flat=True)
+    )
     manager.current_context().dialog_data["link"] = "".join(
-        await Programs.filter(key=int(item_id), category="school").values_list("link", flat=True))
+        await Programs.filter(key=int(item_id), category="school").values_list("link", flat=True)
+    )
+    manager.current_context().dialog_data["faq"] = "".join(
+        await Programs.filter(key=int(item_id), category="school").values_list("faq", flat=True)
+    )
     await manager.switch_to(ProgramsSG_sch.program_info)
 
 
@@ -278,7 +289,6 @@ programs_dialog_sch = Dialog(
             id="grades",
             on_click=on_program_clicked_sch
         )),
-        # Button(Const("⏪ Назад"), id="smrt_back_quest", on_click=smrt_back_is_admin),
         Cancel(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
@@ -286,6 +296,7 @@ programs_dialog_sch = Dialog(
     ),
     Window(
         Format('{program_info}'),
+        SwitchTo(Const('FAQ по программе'), id="faq_sch", state=ProgramsSG_sch.faq),
         Url(
             Const("Зарегистрироваться!"),
             Format('{link}'),
@@ -294,6 +305,14 @@ programs_dialog_sch = Dialog(
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
         state=ProgramsSG_sch.program_info
+    ),
+    Window(
+        Format('{faq}'),
+        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.ask),
+        Back(Const("⏪ Назад")),
+        getter=get_data_programs,
+        parse_mode=ParseMode.HTML,
+        state=ProgramsSG_sch.faq
     ),
     launch_mode=LaunchMode.SINGLE_TOP
 )
@@ -308,7 +327,6 @@ programs_dialog_std = Dialog(
             id="grades",
             on_click=on_program_clicked_std
         )),
-        # Button(Const("⏪ Назад"), id="smrt_back_quest", on_click=smrt_back_is_admin),
         Cancel(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
@@ -316,6 +334,7 @@ programs_dialog_std = Dialog(
     ),
     Window(
         Format('{program_info}'),
+        SwitchTo(Const('FAQ по программе'), id="faq_std", state=ProgramsSG_std.faq),
         Url(
             Const("Зарегистрироваться!"),
             Format('{link}'),
@@ -324,6 +343,14 @@ programs_dialog_std = Dialog(
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
         state=ProgramsSG_std.program_info
+    ),
+    Window(
+        Format('{faq}'),
+        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.ask),
+        Back(Const("⏪ Назад")),
+        getter=get_data_programs,
+        parse_mode=ParseMode.HTML,
+        state=ProgramsSG_std.faq
     ),
     launch_mode=LaunchMode.SINGLE_TOP
 )

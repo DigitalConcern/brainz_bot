@@ -46,6 +46,14 @@ class Programs(Model):
     class Meta:
         table = "programs"
 
+class FAQ(Model):
+    id = fields.IntField(pk=True)
+    text = fields.TextField()
+
+    class Meta:
+        table = "faq"
+
+
 
 # Инициализация базы данных
 async def run():

@@ -7,7 +7,7 @@ from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel, Url, Group
 from aiogram_dialog.widgets.text import Const, Format
 
-from database import ActiveUsers, Questions, Programs
+from database import ActiveUsers, Questions, Programs,FAQ
 from bot import MyBot
 from config import Counter, Names, CHAT_ID
 
@@ -191,6 +191,12 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
     else:
         await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
+async def get_faq(dialog_manager: DialogManager, **kwargs):
+    faq = (await FAQ.filter(id=1).values_list("text", flat=True))[0]
+    return {
+        'faq': faq
+    }
+
 
 # Диалог с вопросами
 question_dialog = Dialog(
@@ -204,9 +210,10 @@ question_dialog = Dialog(
 
     ),
     Window(
-        Const("Здесь будут часто ответы на часто задаваемые вопросы!"),
+        Format("{faq}"),
         Back(Const("⏪ Назад")),
-        state=QuestionsSG.faq
+        state=QuestionsSG.faq,
+        getter=get_faq
     ),
     Window(
         Const("Отправь в бот сообщение с вопросом – мы перешлем его сотруднику (но только одно, если у тебя появятся "

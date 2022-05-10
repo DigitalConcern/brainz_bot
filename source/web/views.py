@@ -177,3 +177,16 @@ class UsersDelView(DeleteView):
     model = models.ActiveUsers
     template_name = "users_delete.html"
     success_url = "/users"
+
+
+class FAQView(UpdateView):
+    model = models.FAQ
+    template_name = "faq.html"
+    fields = ['text']
+
+    def form_valid(self, form):
+        elem = models.FAQ()
+        elem.id = 1
+        elem.text = form.cleaned_data["text"]
+        elem.save()
+        return redirect("/faq")

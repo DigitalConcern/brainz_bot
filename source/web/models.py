@@ -46,6 +46,15 @@ class Programs(models.Model):
     class Meta:
         db_table = "programs"
 
+class FAQ(models.Model):
+    id = models.IntegerField(primary_key=True)
+    text = models.TextField()
+
+    def get_absolute_url(self):
+        return '/faq'
+
+    class Meta:
+        db_table = "faq"
 
 class Links(models.Model):
     link = models.TextField()

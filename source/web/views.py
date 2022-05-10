@@ -189,4 +189,4 @@ class FAQView(UpdateView):
         elem.id = 1
         elem.text = form.cleaned_data["text"]
         elem.save()
-        return redirect("/faq")
+        return redirect("/faq/1")

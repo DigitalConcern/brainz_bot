@@ -57,5 +57,5 @@ class FAQForm(forms.ModelForm):
         model = models.FAQ
         fields = ['text']
         widgets = {
-            "text": Textarea(attrs={'class': 'form-control', 'placeholder': 'ФАК-ю'})
+            "text": Textarea(attrs={'class': 'form-control','style': 'height: 300px', 'placeholder': 'ФАК-ю'})
         }

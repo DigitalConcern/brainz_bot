@@ -51,3 +51,11 @@ class UserForm(forms.ModelForm):
             "grade": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
             "is_admin": CheckboxInput(attrs={'class': 'form-check-input', 'role': 'switch'}),
         }
+
+class FAQForm(forms.ModelForm):
+    class Meta:
+        model = models.FAQ
+        fields = ['text']
+        widgets = {
+            "text": Textarea(attrs={'class': 'form-control', 'placeholder': 'ФАК-ю'})
+        }

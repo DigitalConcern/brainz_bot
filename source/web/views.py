@@ -8,7 +8,7 @@ import asyncio
 from sesame import utils
 from . import models
 from . import forms
-from .forms import ProgramForm, UserForm
+from .forms import ProgramForm, UserForm, FAQForm
 from django.utils.translation import gettext as _
 
 
@@ -182,7 +182,7 @@ class UsersDelView(DeleteView):
 class FAQView(UpdateView):
     model = models.FAQ
     template_name = "faq.html"
-    fields = ['text']
+    form_class = FAQForm
 
     def form_valid(self, form):
         elem = models.FAQ()

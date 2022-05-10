@@ -51,6 +51,7 @@ async def start(m: Message, dialog_manager: DialogManager):
 
 # Регистрируем хэндлер start
 MyBot.register_handler(method=start, commands=["start"])
+MyBot.register_handler(method=start, commands=["menu"])
 # Регистрируем все диалоги
 
 MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog_sch, programs_dialog_std, question_dialog)

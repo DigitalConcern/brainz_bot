@@ -124,7 +124,6 @@ class ProgramsSG_sch(StatesGroup):
 # Класс состояний диалога вопросов
 class QuestionsSG(StatesGroup):
     choose = State()
-    faq = State()
     ask = State()
 
 
@@ -201,20 +200,15 @@ async def get_faq(dialog_manager: DialogManager, **kwargs):
 # Диалог с вопросами
 question_dialog = Dialog(
     Window(
-        Format("Прежде, чем отправить вопрос, убедись, пожалуйста, что ответа нет в FAQ."),
-        SwitchTo(Const("Ответы на частые вопросы"), id="faq", state=QuestionsSG.faq),
+        Format("Прежде, чем отправить вопрос, убедись, пожалуйста, что ответа нет в FAQ.\n{faq}"),
         SwitchTo(Const("Всё равно задать вопрос"), id="ask", state=QuestionsSG.ask),
         Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,
+        getter=get_faq,
         state=QuestionsSG.choose
 
     ),
-    Window(
-        Format("{faq}"),
-        Back(Const("⏪ Назад")),
-        state=QuestionsSG.faq,
-        getter=get_faq
-    ),
+
     Window(
         Const("Отправь в бот сообщение с вопросом – мы перешлем его сотруднику (но только одно, если у тебя появятся "
               "новые вопросы, заново перейди по кнопке из меню)"),

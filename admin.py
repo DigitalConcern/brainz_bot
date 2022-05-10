@@ -16,7 +16,7 @@ from aiogram_dialog.manager.protocols import LaunchMode
 from aiogram_dialog.widgets.kbd import Start
 from aiogram_dialog.widgets.text import Const
 
-from database import ActiveUsers
+from database import ActiveUsers, FAQ
 from bot import MyBot
 from user import UserSG, RegistrationSG, registration_dialog, user_menu_dialog, programs_dialog_sch, \
     programs_dialog_std, question_dialog
@@ -25,6 +25,8 @@ user_id = 0
 
 
 async def start(m: Message, dialog_manager: DialogManager):
+    if not (await FAQ.filter(id=1).values_list("text")):
+        await FAQ(id=1, text="default").save()
     if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
         await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
         # Если его нет в базе, то предлагаем зарегистрироваться
@@ -94,6 +96,7 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
         'link': link
     }
 
+
 async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
     # Находим в Бд все ключи вопросов и проверяем содержатся ли они в сообщении
     for i in await Questions.filter().values_list("key", "is_answered"):
@@ -111,6 +114,7 @@ async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
             return
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
+
 # Обрабатываем сообщение о подтверждении ответа на вопрос
 async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
     await MyBot.bot.send_message(
@@ -119,7 +123,7 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
         "На Ваш вопрос:\n" +
         (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("question",
                                                                                                  flat=True))[0] + "\n"
-        "Поступил ответ:\n" +
+                                                                                                                  "Поступил ответ:\n" +
         manager.current_context().dialog_data["answer"])
     # Находим в бд кому отправить сообщение, после чего - отправляем
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
@@ -128,12 +132,11 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
-
 # Корневой диалог админа
 menu_admin_dialog = Dialog(
     Window(
         Const("Выбери действие 🤔"),
-        #Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
+        # Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
         Start(Const("Я хочу побыть юзером! 😈"), id="uss", state=UserSG.admin_menu),
         Url(Const("Изменить информацию ℹ️"), Format("{link}")),
@@ -228,35 +231,28 @@ post_dialog = Dialog(
     launch_mode=LaunchMode.SINGLE_TOP
 )
 
-
-
-
-
-
-
-
 # Ветка с ответом на вопрос
 # answer_dialog = Dialog(
-    # Window(
-    #     Const("Пожалуйста, напишите текст ответа на вопрос"),
-    #     MessageInput(answer_handler),
-    #     Cancel(Const("⏪ Назад")),
-    #     state=AnswerSG.answer
-    # ),
-    # Window(
-    #     Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
-    #            '<b>Тикет:</b> {ticket} <i>{is_answered}</i>\n'
-    #            '<b>Ответ:</b> {answer}\n'
-    #            '<b>Получатель:</b> {questioner}\n'
-    #            ),
-    #     Column(
-    #         Button(Const("Всё верно! ✅"), id="yes", on_click=on_answer_ok_clicked),
-    #         Back(Const("⏪ Назад"))
-    #     ),
-    #     parse_mode=ParseMode.HTML,
-    #     state=AnswerSG.check,
-    #     getter=get_data
-    # ),
+# Window(
+#     Const("Пожалуйста, напишите текст ответа на вопрос"),
+#     MessageInput(answer_handler),
+#     Cancel(Const("⏪ Назад")),
+#     state=AnswerSG.answer
+# ),
+# Window(
+#     Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
+#            '<b>Тикет:</b> {ticket} <i>{is_answered}</i>\n'
+#            '<b>Ответ:</b> {answer}\n'
+#            '<b>Получатель:</b> {questioner}\n'
+#            ),
+#     Column(
+#         Button(Const("Всё верно! ✅"), id="yes", on_click=on_answer_ok_clicked),
+#         Back(Const("⏪ Назад"))
+#     ),
+#     parse_mode=ParseMode.HTML,
+#     state=AnswerSG.check,
+#     getter=get_data
+# ),
 #     launch_mode=LaunchMode.SINGLE_TOP
 # )
 

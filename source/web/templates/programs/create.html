@@ -43,31 +43,32 @@
           <div class="card-body">
             <form method="post">
               {% csrf_token %}
-              <div class="form-floating mb-3">
+              <div class="mb-3">
+                 <label>Название</label>
                 {{form.name}}
-                <label>Название</label>
               </div>
-              <div class="form-floating mb-3">
+              <div class="mb-3">
+                <label>Краткое описание</label>
                 {{form.description}}
-                <label>Описание</label>
               </div>
-              <div class="form-floating mb-3">
+              <div class="mb-3">
+                <label>Подробное описание</label>
                 {{form.info}}
-                <label>Подробно</label>
               </div>
-              <div class="form-floating mb-3">
-                {{form.faq}}
+              <div class="mb-3">
                 <label>FAQ</label>
+                {{form.faq}}
               </div>
-              <div class="form-floating mb-3">
+              <div class="mb-3">
+                 <label>Ссылка</label>
                 {{form.link}}
-                <label>Ссылка</label>
               </div>
-              <div class="form-floating mb-3">
-              {{form.category}}
+              <div class="mb-3">
                 <label>Категория</label>
+              {{form.category}}
+
                 </div>
-              <div class="form-floating mb-3">
+              <div class="mb-3">
                 <div class="form-check form-switch">
                   {{form.is_active}}
                   <label>Активна?</label>

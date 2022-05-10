@@ -28,15 +28,14 @@ class ProgramForm(forms.ModelForm):
         model = models.Programs
         fields = ['name', 'description', 'info', 'faq', 'category', 'is_active', 'link']
         widgets = {
-            "name": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название'}),
-            "description": Textarea(attrs={'class': 'form-control', 'style': 'height: 100px', 'placeholder': 'Краткое '
-                                                                                                             'описание'}),
-            "info": Textarea(attrs={'class': 'form-control', 'style': 'height: 200px', 'placeholder': 'q'}),
-            "faq": Textarea(attrs={'class': 'form-control', 'style': 'height: 200px', 'placeholder': 'q'}),
+            "name": TextInput(attrs={'class': 'form-control', 'placeholder': 'Название программы'}),
+            "description": Textarea(attrs={'class': 'form-control', 'style': 'height: 100px', 'placeholder': 'Текст, который отображается в списке программ'}),
+            "info": Textarea(attrs={'class': 'form-control', 'style': 'height: 200px', 'placeholder': 'Текст, который пользователь видит при переходе к программе'}),
+            "faq": Textarea(attrs={'class': 'form-control', 'style': 'height: 200px', 'placeholder': 'Ответы на часто задаваемые вопросы по программе'}),
             "category": Select(attrs={'class': 'form-select'},
                                choices=(('students', 'Студенты'), ('school', 'Школьники'))),
             "is_active": CheckboxInput(attrs={'class': 'form-check-input', 'role': 'switch'}),
-            "link": TextInput(attrs={'class': 'form-control', 'placeholder': 'r'}),
+            "link": TextInput(attrs={'class': 'form-control', 'placeholder': 'https://www.croc.ru/'}),
 
         }
 

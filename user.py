@@ -4,7 +4,7 @@ from aiogram.types import Message, CallbackQuery, ParseMode
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto, LaunchMode
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel, Url
+from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel, Url, Group
 from aiogram_dialog.widgets.text import Const, Format
 
 from database import ActiveUsers, Questions, Programs
@@ -235,10 +235,12 @@ async def get_data_programs(dialog_manager: DialogManager, **kwargs):
 
     for i in range(len(programs_students)):
         preview_students += f'<b>{keys_students[i]}. {names_students[i]}</b>\n{programs_students[i]}\n\n'
-
+    if preview_students == '':
+        preview_students = "Активных программ нет"
     for i in range(len(programs_school)):
         preview_school = f'<b>{keys_school[i]}. {names_school[i]}</b>\n{programs_school[i]}\n\n'
-
+    if preview_school == '':
+        preview_school = "Активных программ нет"
     return {
         'programs_list_student': preview_students,
         'programs_list_school': preview_school,
@@ -287,13 +289,13 @@ async def on_program_clicked_sch(c: ChatEvent, select: Select, manager: DialogMa
 programs_dialog_sch = Dialog(
     Window(
         Format("{programs_list_school}"),
-        Row(Select(
+        Group(Select(
             Format("{item}"),
             items="keys_school",
             item_id_getter=lambda x: x,
             id="grades",
             on_click=on_program_clicked_sch
-        )),
+        ), width=3),
         Cancel(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
@@ -325,13 +327,13 @@ programs_dialog_sch = Dialog(
 programs_dialog_std = Dialog(
     Window(
         Format("{programs_list_student}"),
-        Row(Select(
+        Group(Select(
             Format("{item}"),
             items="keys_students",
             item_id_getter=lambda x: x,
             id="grades",
             on_click=on_program_clicked_std
-        )),
+        ), width=3),
         Cancel(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,

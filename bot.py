@@ -21,6 +21,10 @@ class MyBot:
         cls.dp.register_message_handler(kwargs["method"], commands=kwargs["commands"])
 
     @classmethod
+    def register_answ_handler(cls, **kwargs):
+        cls.dp.register_message_handler(kwargs["method"], content_types=kwargs["content_types"])
+
+    @classmethod
     def register_dialogs(cls, *args):
         for dialog in args:
             cls.registry.register(dialog)

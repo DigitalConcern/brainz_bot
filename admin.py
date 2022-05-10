@@ -60,13 +60,14 @@ MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog_sc
 # Класс состояний корневого диалога администратора
 class AdminSG(StatesGroup):
     admin = State()
+    check = State()
 
 
 # Класс состояний ветки диалога с ответами на вопросы
-class AnswerSG(StatesGroup):
-    answer = State()
-    ticket = State()
-    check = State()
+# class AnswerSG(StatesGroup):
+#     answer = State()
+#     ticket = State()
+#     check = State()
 
 
 # Класс состояний ветки диалога с постом
@@ -93,16 +94,65 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
         'link': link
     }
 
+async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
+    # Находим в Бд все ключи вопросов и проверяем содержатся ли они в сообщении
+    for i in await Questions.filter().values_list("key", "is_answered"):
+        if m.text.find(str(i[0])) != -1:
+            if i[1]:
+                manager.current_context().dialog_data["is_answered"] = "На этот вопрос уже поступал ответ"
+            # Заменяем ключ вопроса в сообщении ответа на пустую строку
+            manager.current_context().dialog_data["answer"] = m.text.replace(str(i[0]), "")
+            # Записываем номер ключа (тикета) в данные состояния
+            manager.current_context().dialog_data["ticket"] = str(i[0])
+            # Записываем имя юзера в данные состояния
+            manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i[0]).values_list(
+                "user_id__code_name", flat=True))[0]
+            await manager.dialog().switch_to(AdminSG.check)
+            return
+    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+
+# Обрабатываем сообщение о подтверждении ответа на вопрос
+async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
+    await MyBot.bot.send_message(
+        (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("user_id_id",
+                                                                                                 flat=True))[0],
+        "На Ваш вопрос:\n" +
+        (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("question",
+                                                                                                 flat=True))[0] + "\n"
+        "Поступил ответ:\n" +
+        manager.current_context().dialog_data["answer"])
+    # Находим в бд кому отправить сообщение, после чего - отправляем
+    await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
+    await MyBot.bot.send_message(c.from_user.id, "Ответ отправлен")
+    await manager.done()
+    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+
+
 
 # Корневой диалог админа
 menu_admin_dialog = Dialog(
     Window(
         Const("Выбери действие 🤔"),
-        Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
+        #Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
         Start(Const("Я хочу побыть юзером! 😈"), id="uss", state=UserSG.admin_menu),
         Url(Const("Изменить информацию ℹ️"), Format("{link}")),
+        MessageInput(answer_handler),
         state=AdminSG.admin,
+        getter=get_data
+    ),
+    Window(
+        Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
+               '<b>Тикет:</b> {ticket} <i>{is_answered}</i>\n'
+               '<b>Ответ:</b> {answer}\n'
+               '<b>Получатель:</b> {questioner}\n'
+               ),
+        Column(
+            Button(Const("Всё верно! ✅"), id="yes", on_click=on_answer_ok_clicked),
+            Back(Const("⏪ Назад"))
+        ),
+        parse_mode=ParseMode.HTML,
+        state=AdminSG.check,
         getter=get_data
     ),
     launch_mode=LaunchMode.ROOT
@@ -179,61 +229,36 @@ post_dialog = Dialog(
 )
 
 
-async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
-    # Находим в Бд все ключи вопросов и проверяем содержатся ли они в сообщении
-    for i in await Questions.filter().values_list("key", "is_answered"):
-        if m.text.find(str(i[0])) != -1:
-            if i[1]:
-                manager.current_context().dialog_data["is_answered"] = "На этот вопрос уже поступал ответ"
-            # Заменяем ключ вопроса в сообщении ответа на пустую строку
-            manager.current_context().dialog_data["answer"] = m.text.replace(str(i[0]), "")
-            # Записываем номер ключа (тикета) в данные состояния
-            manager.current_context().dialog_data["ticket"] = str(i[0])
-            # Записываем имя юзера в данные состояния
-            manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i[0]).values_list(
-                "user_id__code_name", flat=True))[0]
-            await manager.dialog().switch_to(AnswerSG.check)
-            return
-    await MyBot.bot.send_message(m.chat.id, "Вопроса с таким номером не существует")
-    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
-# Обрабатываем сообщение о подтверждении ответа на вопрос
-async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
-    await MyBot.bot.send_message(
-        (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("user_id_id",
-                                                                                                 flat=True))[0],
-        manager.current_context().dialog_data["answer"])
-    # Находим в бд кому отправить сообщение, после чего - отправляем
-    await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
-    await MyBot.bot.send_message(c.from_user.id, "Ответ отправлен")
-    await manager.done()
-    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+
+
 
 
 # Ветка с ответом на вопрос
-answer_dialog = Dialog(
-    Window(
-        Const("Пожалуйста, напишите текст ответа на вопрос"),
-        MessageInput(answer_handler),
-        Cancel(Const("⏪ Назад")),
-        state=AnswerSG.answer
-    ),
-    Window(
-        Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
-               '<b>Тикет:</b> {ticket} <i>{is_answered}</i>\n'
-               '<b>Ответ:</b> {answer}\n'
-               '<b>Получатель:</b> {questioner}\n'
-               ),
-        Column(
-            Button(Const("Всё верно! ✅"), id="yes", on_click=on_answer_ok_clicked),
-            Back(Const("⏪ Назад"))
-        ),
-        parse_mode=ParseMode.HTML,
-        state=AnswerSG.check,
-        getter=get_data
-    ),
-    launch_mode=LaunchMode.SINGLE_TOP
-)
+# answer_dialog = Dialog(
+    # Window(
+    #     Const("Пожалуйста, напишите текст ответа на вопрос"),
+    #     MessageInput(answer_handler),
+    #     Cancel(Const("⏪ Назад")),
+    #     state=AnswerSG.answer
+    # ),
+    # Window(
+    #     Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
+    #            '<b>Тикет:</b> {ticket} <i>{is_answered}</i>\n'
+    #            '<b>Ответ:</b> {answer}\n'
+    #            '<b>Получатель:</b> {questioner}\n'
+    #            ),
+    #     Column(
+    #         Button(Const("Всё верно! ✅"), id="yes", on_click=on_answer_ok_clicked),
+    #         Back(Const("⏪ Назад"))
+    #     ),
+    #     parse_mode=ParseMode.HTML,
+    #     state=AnswerSG.check,
+    #     getter=get_data
+    # ),
+#     launch_mode=LaunchMode.SINGLE_TOP
+# )
 
-MyBot.register_dialogs(menu_admin_dialog, answer_dialog, post_dialog)
+# MyBot.register_dialogs(menu_admin_dialog, answer_dialog, post_dialog)
+MyBot.register_dialogs(menu_admin_dialog, post_dialog)

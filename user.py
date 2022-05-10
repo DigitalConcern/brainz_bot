@@ -200,7 +200,7 @@ async def get_faq(dialog_manager: DialogManager, **kwargs):
 # Диалог с вопросами
 question_dialog = Dialog(
     Window(
-        Format("Прежде, чем отправить вопрос, убедись, пожалуйста, что ответа нет в FAQ.\n{faq}"),
+        Format("{faq}"),
         SwitchTo(Const("Всё равно задать вопрос"), id="ask", state=QuestionsSG.ask),
         Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,

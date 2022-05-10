@@ -51,7 +51,7 @@ class FAQ(models.Model):
     text = models.TextField()
 
     def get_absolute_url(self):
-        return '/faq'
+        return '/faq/1'
 
     class Meta:
         db_table = "faq"

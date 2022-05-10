@@ -47,8 +47,8 @@
             <form method="post">
               {% csrf_token %}
               <div class="form-floating mb-3">
-                <label>Общее FAQ</label>
                 {{form.text}}
+                <label>Общее FAQ</label>
               </div>
               <div>
                 <button type="submit" class="btn btn-success">Сохранить</button>

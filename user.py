@@ -11,7 +11,6 @@ from database import ActiveUsers, Questions, Programs, FAQ
 from bot import MyBot
 from config import Counter, Names, CHAT_ID
 
-
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
 # список админов и инфу про программы
 

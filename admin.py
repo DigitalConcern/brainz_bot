@@ -179,6 +179,7 @@ menu_admin_dialog = Dialog(
         Column(
             SwitchTo(Const("⏪ Назад"), id="bc", state=AdminSG.admin)
         ),
+        MessageInput(answer_handler),
         parse_mode=ParseMode.HTML,
         state=AdminSG.unanswered,
         getter=get_data

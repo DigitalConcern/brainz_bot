@@ -102,6 +102,7 @@ class ProgramsEditView(UpdateView):
         elem.key = len(models.Programs.objects.filter(category=form.cleaned_data["category"])) + 1
         elem.name = form.cleaned_data["name"]
         prg_name = elem.name
+        elem.faq = form.cleaned_data["faq"]
         elem.link = form.cleaned_data["link"]
         elem.description = form.cleaned_data["description"]
         elem.info = form.cleaned_data["info"]

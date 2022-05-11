@@ -190,7 +190,7 @@ menu_admin_dialog = Dialog(
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
         Url(Const("Изменить информацию ℹ️"), Format("{link}")),
         Start(Const("Я хочу побыть юзером! 😈"), id="uss", state=UserSG.admin_menu),
-        MessageInput(answer_handler),
+        MessageInput(answer_handler,content_types=["text", "photo"]),
         state=AdminSG.admin,
         getter=get_data
     ),
@@ -215,7 +215,7 @@ menu_admin_dialog = Dialog(
         Column(
             SwitchTo(Const("⏪ Назад"), id="bc", state=AdminSG.admin)
         ),
-        MessageInput(answer_handler),
+        MessageInput(answer_handler,content_types=["text", "photo"]),
         parse_mode=ParseMode.HTML,
         state=AdminSG.unanswered,
         getter=get_data

@@ -150,10 +150,10 @@ menu_admin_dialog = Dialog(
     Window(
         Const("Выбери действие 🤔"),
         # Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
-        Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
-        Start(Const("Я хочу побыть юзером! 😈"), id="uss", state=UserSG.admin_menu),
         SwitchTo(Const("Посмотреть неотвеченные вопросы"), id="qu", state=AdminSG.unanswered),
+        Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
         Url(Const("Изменить информацию ℹ️"), Format("{link}")),
+        Start(Const("Я хочу побыть юзером! 😈"), id="uss", state=UserSG.admin_menu),
         MessageInput(answer_handler),
         state=AdminSG.admin,
         getter=get_data

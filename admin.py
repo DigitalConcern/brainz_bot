@@ -64,6 +64,7 @@ MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog_sc
 class AdminSG(StatesGroup):
     admin = State()
     check = State()
+    unanswered = State()
 
 
 # Класс состояний ветки диалога с ответами на вопросы
@@ -84,6 +85,9 @@ class PostSG(StatesGroup):
 async def get_data(dialog_manager: DialogManager, **kwargs):
     global user_id
     link = (await ActiveUsers.filter(user_id=user_id).values_list("link", flat=True))[0]
+    unansw_list = ""
+    for ticket in (await ActiveUsers.filter(is_answered=False).values_list("key", flat=True)):
+        unansw_list = unansw_list + str(ticket) + '\n'
     return {
         'id': dialog_manager.current_context().dialog_data.get("id", None),
         'post': dialog_manager.current_context().dialog_data.get("post", None),
@@ -94,7 +98,8 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
         'category': dialog_manager.current_context().dialog_data.get("category", None),
         'photo': dialog_manager.current_context().dialog_data.get("photo", None),
         'is_answered': dialog_manager.current_context().dialog_data.get("is_answered", ""),
-        'link': link
+        'link': link,
+        'unansw_list': unansw_list
     }
 
 
@@ -160,6 +165,17 @@ menu_admin_dialog = Dialog(
                ),
         Column(
             Button(Const("Всё верно! ✅"), id="yes", on_click=on_answer_ok_clicked),
+            Back(Const("⏪ Назад"))
+        ),
+        parse_mode=ParseMode.HTML,
+        state=AdminSG.check,
+        getter=get_data
+    ),
+    Window(
+        Format('Неотвеченные сообщения:\n'
+               '<b>{unansw_list}</b>'
+               ),
+        Column(
             Back(Const("⏪ Назад"))
         ),
         parse_mode=ParseMode.HTML,

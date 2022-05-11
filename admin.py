@@ -177,7 +177,7 @@ menu_admin_dialog = Dialog(
                '<b>{unansw_list}</b>'
                ),
         Column(
-            Back(Const("⏪ Назад"))
+            SwitchTo(Const("⏪ Назад"), id="bc", state=AdminSG.admin)
         ),
         parse_mode=ParseMode.HTML,
         state=AdminSG.unanswered,

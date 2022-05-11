@@ -7,7 +7,7 @@ from aiogram_dialog.widgets.input import MessageInput
 from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel, Url, Group
 from aiogram_dialog.widgets.text import Const, Format
 
-from database import ActiveUsers, Questions, Programs,FAQ
+from database import ActiveUsers, Questions, Programs, FAQ
 from bot import MyBot
 from config import Counter, Names, CHAT_ID
 
@@ -178,7 +178,10 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
         await Questions(key=count, user_id_id=m.from_user.id, question=m.caption, is_answered=False).save()
 
     else:
-        await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name,
+        await MyBot.bot.send_message(CHAT_ID,
+                                     "Вопрос " + f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name +
+                                     "\nДля ответа сделайте реплай и укажите соответствующий хештег - " +
+                                     f'<b>{str(count)}</b>',
                                      parse_mode="HTML")
         await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
 
@@ -189,6 +192,7 @@ async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: 
         await manager.start(UserSG.admin_menu, mode=StartMode.NORMAL)
     else:
         await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
+
 
 async def get_faq(dialog_manager: DialogManager, **kwargs):
     faq = (await FAQ.filter(id=1).values_list("text", flat=True))[0]

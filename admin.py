@@ -104,15 +104,22 @@ async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
         if m.text.find(str(i[0])) != -1:
             if i[1]:
                 manager.current_context().dialog_data["is_answered"] = "На этот вопрос уже поступал ответ"
-            # Заменяем ключ вопроса в сообщении ответа на пустую строку
-            manager.current_context().dialog_data["answer"] = m.text.replace(str(i[0]), "")
-            # Записываем номер ключа (тикета) в данные состояния
-            manager.current_context().dialog_data["ticket"] = str(i[0])
-            # Записываем имя юзера в данные состояния
-            manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i[0]).values_list(
-                "user_id__code_name", flat=True))[0]
-            await manager.dialog().switch_to(AdminSG.check)
-            return
+
+            if m.reply_to_message.text.find(str(i[0])) != -1:
+                # Заменяем ключ вопроса в сообщении ответа на пустую строку
+                manager.current_context().dialog_data["answer"] = m.text.replace(str(i[0]), "")
+                # Записываем номер ключа (тикета) в данные состояния
+                manager.current_context().dialog_data["ticket"] = str(i[0])
+                # Записываем имя юзера в данные состояния
+                manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i[0]).values_list(
+                    "user_id__code_name", flat=True))[0]
+                await manager.dialog().switch_to(AdminSG.check)
+                return
+            else:
+                await MyBot.bot.send_message(manager.current_context().dialog_data["id"],
+                                             "Несоответствие указанного хештега и хештега в реплае")
+                await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 

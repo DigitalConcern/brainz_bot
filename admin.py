@@ -86,7 +86,7 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
     global user_id
     link = (await ActiveUsers.filter(user_id=user_id).values_list("link", flat=True))[0]
     unansw_list = ""
-    for ticket in (await ActiveUsers.filter(is_answered=False).values_list("key", flat=True)):
+    for ticket in (await Questions.filter(is_answered=False).values_list("key", flat=True)):
         unansw_list = unansw_list + str(ticket) + '\n'
     return {
         'id': dialog_manager.current_context().dialog_data.get("id", None),

@@ -179,7 +179,7 @@ menu_admin_dialog = Dialog(
             Back(Const("⏪ Назад"))
         ),
         parse_mode=ParseMode.HTML,
-        state=AdminSG.check,
+        state=AdminSG.unanswered,
         getter=get_data
     ),
     launch_mode=LaunchMode.ROOT

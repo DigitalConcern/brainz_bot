@@ -105,40 +105,76 @@ async def get_data(dialog_manager: DialogManager, **kwargs):
 
 async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
     # Находим в Бд все ключи вопросов и проверяем содержатся ли они в сообщении
-    for i in await Questions.filter().values_list("key", "is_answered"):
-        if m.text.find(str(i[0])) != -1:
-            if i[1]:
-                manager.current_context().dialog_data["is_answered"] = "На этот вопрос уже поступал ответ"
+    if m.text is None:  # Когда фотка есть нет
+        for i in await Questions.filter().values_list("key", "is_answered"):
+            if m.caption.find(str(i[0])) != -1:
+                if i[1]:
+                    manager.current_context().dialog_data["is_answered"] = "На этот вопрос уже поступал ответ"
+                if m.reply_to_message.text.find(str(i[0])) != -1:
+                    manager.current_context().dialog_data["photo"] = await MyBot.bot.get_file(m.photo[-1].file_id)
+                    # Заменяем ключ вопроса в сообщении ответа на пустую строку
+                    manager.current_context().dialog_data["answer"] = m.caption.replace(str(i[0]), "")
+                    # Записываем номер ключа (тикета) в данные состояния
+                    manager.current_context().dialog_data["ticket"] = str(i[0])
+                    # Записываем имя юзера в данные состояния
+                    manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i[0]).values_list(
+                        "user_id__code_name", flat=True))[0]
+                    await manager.dialog().switch_to(AdminSG.check)
+                    return
+                else:
+                    await MyBot.bot.send_message(manager.current_context().dialog_data["id"],
+                                                 "Несоответствие указанного хештега и хештега в реплае")
+                    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
-            if m.reply_to_message.text.find(str(i[0])) != -1:
-                # Заменяем ключ вопроса в сообщении ответа на пустую строку
-                manager.current_context().dialog_data["answer"] = m.text.replace(str(i[0]), "")
-                # Записываем номер ключа (тикета) в данные состояния
-                manager.current_context().dialog_data["ticket"] = str(i[0])
-                # Записываем имя юзера в данные состояния
-                manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i[0]).values_list(
-                    "user_id__code_name", flat=True))[0]
-                await manager.dialog().switch_to(AdminSG.check)
-                return
-            else:
-                await MyBot.bot.send_message(manager.current_context().dialog_data["id"],
-                                             "Несоответствие указанного хештега и хештега в реплае")
-                await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+        await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+    else:  # Когда фотки нет
+        for i in await Questions.filter().values_list("key", "is_answered"):
+            if m.text.find(str(i[0])) != -1:
+                if i[1]:
+                    manager.current_context().dialog_data["is_answered"] = "На этот вопрос уже поступал ответ"
 
-    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+                if m.reply_to_message.text.find(str(i[0])) != -1:
+                    manager.current_context().dialog_data["photo"] = None
+                    # Заменяем ключ вопроса в сообщении ответа на пустую строку
+                    manager.current_context().dialog_data["answer"] = m.text.replace(str(i[0]), "")
+                    # Записываем номер ключа (тикета) в данные состояния
+                    manager.current_context().dialog_data["ticket"] = str(i[0])
+                    # Записываем имя юзера в данные состояния
+                    manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i[0]).values_list(
+                        "user_id__code_name", flat=True))[0]
+                    await manager.dialog().switch_to(AdminSG.check)
+                    return
+                else:
+                    await MyBot.bot.send_message(manager.current_context().dialog_data["id"],
+                                                 "Несоответствие указанного хештега и хештега в реплае")
+                    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+
+        await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
 # Обрабатываем сообщение о подтверждении ответа на вопрос
 async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
-    await MyBot.bot.send_message(
-        (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("user_id_id",
-                                                                                                 flat=True))[0],
-        "На Ваш вопрос:\n" +
-        (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("question",
-                                                                                                 flat=True))[0] + "\n"
-                                                                                                                  "Поступил ответ:\n" +
-        manager.current_context().dialog_data["answer"])
-    # Находим в бд кому отправить сообщение, после чего - отправляем
+    if manager.current_context().dialog_data["photo"] is None:
+        await MyBot.bot.send_message(
+            (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("user_id_id",
+                                                                                                     flat=True))[0],
+            "На Ваш вопрос:\n" +
+            (await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("question",
+                                                                                                     flat=True))[
+                0] + "\n"
+                     "Поступил ответ:\n" +
+            manager.current_context().dialog_data["answer"])
+
+        # Находим в бд кому отправить сообщение, после чего - отправляем
+
+    else:
+        await MyBot.bot.send_photo((await Questions.filter(
+            key=manager.current_context().dialog_data["ticket"]).values_list("user_id_id", flat=True))[0],
+                                   manager.current_context().dialog_data["photo"].file_id
+                                   , caption=str("На Ваш вопрос:\n" + (
+                await Questions.filter(key=manager.current_context().dialog_data["ticket"]).values_list("question",
+                                                                                                        flat=True))[
+                0] + "\nПоступил ответ:\n" + manager.current_context().dialog_data["answer"]))
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
     await MyBot.bot.send_message(c.from_user.id, "Ответ отправлен")
     await manager.done()

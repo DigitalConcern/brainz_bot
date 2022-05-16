@@ -1,7 +1,7 @@
 import random
 
 API_TOKEN = "5176288897:AAFWal8jXz6Z4SKPJYf4MNsxc5tRskDQRYY"
-CHAT_ID = "380781069"
+CHAT_ID = "478769369"
 
 # Массив для выбора кодового имени юзера (для поиска его вопросов)
 stuff = [

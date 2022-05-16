@@ -165,10 +165,9 @@ class UsersEditView(UpdateView):
         elem.grade = form.cleaned_data["grade"]
         elem.is_admin = form.cleaned_data["is_admin"]
         if form.cleaned_data["is_admin"] is True:
-            # elem.password = "1agkj385wELKG7W3EJtghfi32"
             user = models.ActiveUsers.objects.get(user_id=int(elem.user_id))
             login_token = utils.get_parameters(user)
-            elem.link = "http://178.216.98.49/?sesame={}".format(login_token["sesame"])
+            elem.link = "http://178.216.98.48/?sesame={}".format(login_token["sesame"])
             print(elem.link)
         elem.save()
         return redirect("/users")

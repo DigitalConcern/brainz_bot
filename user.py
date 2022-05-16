@@ -4,12 +4,12 @@ from aiogram.types import Message, CallbackQuery, ParseMode
 from aiogram_dialog import Dialog, DialogManager, Window, ChatEvent, StartMode
 from aiogram_dialog.manager.protocols import ManagedDialogAdapterProto, LaunchMode
 from aiogram_dialog.widgets.input import MessageInput
-from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel
+from aiogram_dialog.widgets.kbd import Button, Select, Row, SwitchTo, Back, Start, Cancel, Url, Group
 from aiogram_dialog.widgets.text import Const, Format
 
-from database import ActiveUsers, Questions
+from database import ActiveUsers, Questions, Programs, FAQ
 from bot import MyBot
-from config import Counter, NameCounter, CHAT_ID, programs_list
+from config import Counter, Names, CHAT_ID
 
 
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
@@ -19,92 +19,69 @@ from config import Counter, NameCounter, CHAT_ID, programs_list
 # Класс состояний регистрации пользователя
 class RegistrationSG(StatesGroup):
     hi = State()
-    name = State()
     grade = State()
     choose_grade = State()
 
 
-async def start(m: Message, dialog_manager: DialogManager):
-    if not (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_id")):
-        await dialog_manager.start(RegistrationSG.hi, mode=StartMode.RESET_STACK)
-        # Если его нет в базе, то предлагаем зарегистрироваться
-        dialog_manager.current_context().dialog_data["id"] = m.from_user.id
-    else:
-        await MyBot.bot.send_message(m.from_user.id, f'Привет, '
-                                                     f'<b>{"".join((await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0])}!</b>',
-                                     parse_mode="HTML")
-        # Если он есть то переходим в меню
-        await dialog_manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
-        dialog_manager.current_context().dialog_data["name"] = \
-            (await ActiveUsers.filter(user_id=m.from_user.id).values_list("user_name"))[0]
-        dialog_manager.current_context().dialog_data["grade"] = \
-            (await ActiveUsers.filter(user_id=m.from_user.id).values_list("grade"))[0]
-
-
-# Регистрируем хэндлер start
-MyBot.register_handler(method=start, text="/start", state="*")
-
-
-async def name_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager):
-    manager.current_context().dialog_data["name"] = m.text
-    await manager.dialog().switch_to(RegistrationSG.grade)
-
-
 # Если студент нажал кнопку "студент"
 async def on_student_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
-    count = NameCounter.get_count()
     manager.current_context().dialog_data["grade"] = "12"
-    while await ActiveUsers.filter(code_name=count).values_list():
-        count = NameCounter.get_count()
-    await ActiveUsers(user_id=manager.current_context().dialog_data["id"],
-                      code_name=count,
-                      user_name=manager.current_context().dialog_data["name"],
-                      grade="12"
+
+    name = Names.get_name()
+    while await ActiveUsers.filter(code_name=name).exists():
+        name = Names.get_name()
+
+    await ActiveUsers(user_id=c.from_user.id,
+                      password=None,
+                      is_admin=False,
+                      code_name=name,
+                      user_name=c.from_user.first_name,
+                      grade="12",
+                      link=None
                       ).save()
-    await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
+    await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Вы зарегистрированы 🎉")
     await manager.done()
     await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
 
 # Выбор класса обучения (для школьников)
 async def on_grade_clicked(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
-    count = NameCounter.get_count()
     manager.current_context().dialog_data["grade"] = item_id
-    while await ActiveUsers.filter(code_name=count).values_list():
-        count = NameCounter.get_count()
-    await ActiveUsers(user_id=manager.current_context().dialog_data["id"],
-                      code_name=count,
-                      user_name=manager.current_context().dialog_data["name"],
-                      grade=manager.current_context().dialog_data["grade"]
+
+    name = Names.get_name()
+    while await ActiveUsers.filter(code_name=name).exists():
+        name = Names.get_name()
+
+    await ActiveUsers(user_id=c.from_user.id,
+                      is_admin=False,
+                      password=None,
+                      code_name=name,
+                      user_name=c.from_user.first_name,
+                      grade=manager.current_context().dialog_data["grade"],
+                      link=None
                       ).save()
-    await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Поздравляю, вы зареганы!")
+    await MyBot.bot.send_message(manager.current_context().dialog_data["id"], "Вы зарегистрированы 🎉")
     await manager.done()
-    await manager.start(UserSG.menu)
+    await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
 
 
 # Диалог регистрации пользователя
 registration_dialog = Dialog(
     Window(
-        Const("Greetings! Мы - КРОК, пройди пжж регистрацию"),
-        SwitchTo(Const("Зарегистрироваться!"), id="fi", state=RegistrationSG.name),
+        Const("Привет! Мы – команда образовательного проекта Brainz, делаем около 50 программ и мероприятий в год: "
+              "игры, кейсы, курсы, практика, акселератор."),
+        SwitchTo(Const("Зарегистрироваться!"), id="fi", state=RegistrationSG.grade),
         state=RegistrationSG.hi
     ),
     Window(
-        Const("Как тебя зовут?"),
-        MessageInput(name_handler),
-        Back(Const("⏪ Назад")),
-        state=RegistrationSG.name
-    ),
-    Window(
-        Const("Ты школьник или студент?"),
+        Const("А чем занимаешься ты?"),
         SwitchTo(Const("Школьник"), id="school", state=RegistrationSG.choose_grade),
         Button(Const("Студент"), id="student", on_click=on_student_clicked),
         Back(Const("⏪ Назад")),
         state=RegistrationSG.grade
     ),
     Window(
-        Const("В каком ты классе?"),
-        Back(Const("⏪ Назад")),
+        Const("В каком классе ты учишься?"),
         Row(Select(
             Format("{item}"),
             items=["<7",
@@ -117,26 +94,36 @@ registration_dialog = Dialog(
             id="grades",
             on_click=on_grade_clicked,
         )),
+        Back(Const("⏪ Назад")),
         state=RegistrationSG.choose_grade
-    )
+    ),
+    launch_mode=LaunchMode.SINGLE_TOP
 )
 
 
 # Класс состояний пользователя
 class UserSG(StatesGroup):
     menu = State()
+    admin_menu = State()
 
 
 # Класс состояний программ
-class ProgramsSG(StatesGroup):
+class ProgramsSG_std(StatesGroup):
     choose_program = State()
     program_info = State()
+    faq = State()
+
+
+# Класс состояний программ
+class ProgramsSG_sch(StatesGroup):
+    choose_program = State()
+    program_info = State()
+    faq = State()
 
 
 # Класс состояний диалога вопросов
 class QuestionsSG(StatesGroup):
     choose = State()
-    faq = State()
     ask = State()
 
 
@@ -152,17 +139,28 @@ async def get_data_user(dialog_manager: DialogManager, **kwargs):
 # Диалог юзера (уже зарегистрирован)
 user_menu_dialog = Dialog(
     Window(
-        Format("Что тебя интересует?"),
-        # Я думал сделать два диалога для шк и студ, но это тупо, поэтому нужно подумать как на этом этапе выгрузить
-        # из бд текст для шк и студов по отдельности
-        Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG.choose_program),
-        Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG.choose_program),
-        Start(Const("Задать вопрос ❓"), id="qu", state=QuestionsSG.choose),
+        Format("Это меню. Здесь ты можешь перейти в каталог образовательных программ для школьников или студентов, "
+               "а если у тебя появились вопросы, то задать их команде Brainz."),
+        Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG_std.choose_program),
+        Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG_sch.choose_program),
+        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.choose),
         parse_mode=ParseMode.HTML,
         # getter=get_data_user,
         state=UserSG.menu
     ),
-    launch_mode=LaunchMode.ROOT
+    Window(
+        Format("Это меню. Здесь ты можешь перейти в каталог образовательных программ для школьников или студентов, "
+               "а если у тебя появились вопросы, то задать их команде Brainz. Из этого меню НЕЛЬЗЯ отвечать на "
+               "вопросы. Для ответа на вопрос вернитесть в предыдущее."),
+        Start(Const("Программы для студентов 🧑‍🎓"), id="stud", state=ProgramsSG_std.choose_program),
+        Start(Const("Программы для школьников 🎒"), id="sch", state=ProgramsSG_sch.choose_program),
+        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.choose),
+        Cancel(Const("⏪ Назад")),
+        parse_mode=ParseMode.HTML,
+        # getter=get_data_user,
+        state=UserSG.admin_menu
+    ),
+    launch_mode=LaunchMode.SINGLE_TOP
 )
 
 
@@ -170,34 +168,57 @@ user_menu_dialog = Dialog(
 async def quest_handler(m: Message, dialog: ManagedDialogAdapterProto, manager: DialogManager):
     count = Counter.get_count()
     name = (await ActiveUsers.filter(user_id=m.from_user.id).values_list("code_name", flat=True))[0]
-    while await Questions.filter(key=count).values_list():
+    while await Questions.filter(key=count).values_list():  # Пока в таблице есть вопрос с таким ключом - генерим его
+        # заново
         count = Counter.get_count()  # Присваиваем вопросу идентификатор (цикл на тот случай если бота перезапустят)
-    await MyBot.bot.send_message(CHAT_ID, f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name, parse_mode="HTML")
-    await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
-    await MyBot.bot.send_message(m.from_user.id, 'Вопрос отправлен!')
-    await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
+    # Если текста нет, значит это фотка
+    if m.text is None:
+        await MyBot.bot.send_photo(CHAT_ID, (await MyBot.bot.get_file(m.photo[-1].file_id)).file_id,
+                                   caption=f'<b>{str(count)}</b>' + '\n'
+                                           + m.caption + "\nОт: " + name, parse_mode="HTML")
+        await Questions(key=count, user_id_id=m.from_user.id, question=m.caption, is_answered=False).save()
+
+    else:
+        await MyBot.bot.send_message(CHAT_ID,
+                                     "Вопрос " + f'<b>{str(count)}</b>' + '\n' + m.text + "\nОт: " + name +
+                                     "\nДля ответа сделайте реплай и укажите соответствующий хештег - " +
+                                     f'<b>{str(count)}</b>',
+                                     parse_mode="HTML")
+        await Questions(key=count, user_id_id=m.from_user.id, question=m.text, is_answered=False).save()
+
+    await MyBot.bot.send_message(m.from_user.id, 'Наш сотрудник уже спешит помочь тебе, ответ придет прямо в бот.')
+
+    if (await ActiveUsers.filter(user_id=m.from_user.id).values_list("is_admin", flat=True))[0]:
+        await manager.done()
+        await manager.start(UserSG.admin_menu, mode=StartMode.NORMAL)
+    else:
+        await manager.start(UserSG.menu, mode=StartMode.RESET_STACK)
+
+
+async def get_faq(dialog_manager: DialogManager, **kwargs):
+    faq = (await FAQ.filter(id=1).values_list("text", flat=True))[0]
+    return {
+        'faq': faq
+    }
+
 
 # Диалог с вопросами
 question_dialog = Dialog(
     Window(
-        Format("Проверь список ответов и вопросов!\n"
-               "Возможно, на твой вопрос уже есть <b>ответ!</b>"),
-        SwitchTo(Const("Задать вопрос эксперту"), id="ask", state=QuestionsSG.ask),
-        SwitchTo(Const("Ответы на частые вопросы"), id="faq", state=QuestionsSG.faq),
+        Format("{faq}"),
+        SwitchTo(Const("Всё равно задать вопрос"), id="ask", state=QuestionsSG.ask),
         Cancel(Const("⏪ Назад")),
         parse_mode=ParseMode.HTML,
+        getter=get_faq,
         state=QuestionsSG.choose
 
     ),
+
     Window(
-        Const("Здесь будут часто ответы на часто задаваемые вопросы!"),
-        SwitchTo(Const("⏪ Назад"), id="smrt_back_faq", state=QuestionsSG.choose),
-        state=QuestionsSG.faq
-    ),
-    Window(
-        Const("Введите вопрос"),
-        MessageInput(quest_handler),
-        SwitchTo(Const("⏪ Назад"), id="smrt_back_ask", state=QuestionsSG.choose),
+        Const("Отправь в бот сообщение с вопросом – мы перешлем его сотруднику (но только одно, если у тебя появятся "
+              "новые вопросы, заново перейди по кнопке из меню)"),
+        MessageInput(quest_handler, content_types=["text", "photo"]),
+        Cancel(Const("⏪ Назад")),
         state=QuestionsSG.ask
     ),
     launch_mode=LaunchMode.SINGLE_TOP
@@ -206,63 +227,146 @@ question_dialog = Dialog(
 
 # функция для получения данных из состояний
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
+    # Достаем из базы тексты всех программ
+    programs_students = list(
+        await Programs.filter(category="students").order_by("key").values_list("description",
+                                                                                               flat=True))
+    names_students = list(await Programs.filter(category="students").order_by("key").values_list("name", flat=True))
+    keys_students = list(await Programs.filter(category="students").order_by("key").values_list("key", flat=True))
+
+    programs_school = list(
+        await Programs.filter(category="school").order_by("key").values_list("description", flat=True))
+    names_school = list(await Programs.filter(category="school").order_by("key").values_list("name", flat=True))
+    keys_school = list(await Programs.filter(category="school").order_by("key").values_list("key", flat=True))
+
+    preview_students = ''
+    preview_school = ''
+
+    for i in range(len(programs_students)):
+        preview_students += f'<b>{keys_students[i]}. {names_students[i]}</b>\n{programs_students[i]}\n\n'
+    if preview_students == '':
+        preview_students = "Активных программ нет"
+    for i in range(len(programs_school)):
+        preview_school += f'<b>{keys_school[i]}. {names_school[i]}</b>\n{programs_school[i]}\n\n'
+    if preview_school == '':
+        preview_school = "Активных программ нет"
     return {
+        'programs_list_student': preview_students,
+        'programs_list_school': preview_school,
         'choose_program': dialog_manager.current_context().dialog_data.get("choose_program", None),
-        'program_info': dialog_manager.current_context().dialog_data.get("program_info", None)
+        'program_info': dialog_manager.current_context().dialog_data.get("program_info", None),
+        'keys_students': keys_students,
+        'keys_school': keys_school,
+        'link': dialog_manager.current_context().dialog_data.get("link", None),
+        'faq': dialog_manager.current_context().dialog_data.get("faq", None)
     }
 
 
-async def on_program_clicked(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
-    # Реализовать через бд
+async def on_program_clicked_std(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
+    # Реализовано через БД
     manager.current_context().dialog_data["choose_program"] = item_id
-    manager.current_context().dialog_data["program_info"] = programs_list[item_id]
-    await manager.switch_to(ProgramsSG.program_info)
+    manager.current_context().dialog_data["program_info"] = "".join(
+        await Programs.filter(key=int(item_id), category="students").values_list("info", flat=True)
+    )
+    manager.current_context().dialog_data["link"] = "".join(
+        await Programs.filter(key=int(item_id), category="students").values_list("link", flat=True)
+    )
+    manager.current_context().dialog_data["faq"] = "".join(
+        await Programs.filter(key=int(item_id), category="students").values_list("faq", flat=True)
+    )
+    await manager.switch_to(ProgramsSG_std.program_info)
+
+
+async def on_program_clicked_sch(c: ChatEvent, select: Select, manager: DialogManager, item_id: str):
+    # Реализовано через БД
+    manager.current_context().dialog_data["choose_program"] = item_id
+    manager.current_context().dialog_data["program_info"] = "".join(
+        await Programs.filter(key=int(item_id), category="school").values_list("info", flat=True)
+    )
+    manager.current_context().dialog_data["link"] = "".join(
+        await Programs.filter(key=int(item_id), category="school").values_list("link", flat=True)
+    )
+    manager.current_context().dialog_data["faq"] = "".join(
+        await Programs.filter(key=int(item_id), category="school").values_list("faq", flat=True)
+    )
+    await manager.switch_to(ProgramsSG_sch.program_info)
+
 
 # Диалог программ будет заполняться в зависимости от того, кто юзер (шк, студ)
 # На данный момент программы одинаковы для всех
 # Так как через словарь сделать не получается, нужно через бд, где будет столбец для кого программа
-programs_dialog = Dialog(
+programs_dialog_sch = Dialog(
     Window(
-        Format("<b>1. Летняя ИТ-школа КРОК</b>\n"
-               "Бесплатный интенсив по погружению в одну из ИТ-профессий:"
-               " от разработки и аналитики до маркетинга и продаж.\n"
-               "В 2021 году студенты прошли обучение по 10 направлениям!\n\n"
-               "<b>2. Лидерская программа</b>\n"
-               "Это сообщество предприимчивых студентов. Мы даем возможности для прокачки,"
-               " знакомим с экспертами из бизнеса и помогаем реализовывать инициативы в своем вузе.\n\n"
-               "<b>3. Разработка приложений на языке С#</b>\n"
-               "ПРАКТИЧЕСКИЙ КУРС ОТ КРОК\n"
-               "Ты на практике разберешься в архитектуре приложений,"
-               " погрузишься в особенности программирования на C#"
-               " и создашь собственное приложение на Microsoft.NET Framework\n\n"
-               "<b>4. ВВЕДЕНИЕ В ЯЗЫК JAVA И ПЛАТФОРМУ РАЗРАБОТКИ</b>\n"
-               "Самые передовые практики и современные инструменты в мире корпоративной разработки на Java."
-               " Эксперты и инженеры-практики по разработке и архитектуре ПО\n\n"
-               "<b>5. Кейс-лаборатория КРОК</b>\n"
-               "Закрой практику в университете, решая кейс под реальный бизнес-запрос. "
-               "Тебя ждут 12 недель командной работы под руководством наставников\n\n"
-               "<b>КЛИКАЙ НА КНОПКИ чтобы узнать подробнее</b>"),
-        Row(Select(
+        Format("{programs_list_school}"),
+        Group(Select(
             Format("{item}"),
-            items=list(programs_list.keys()),
+            items="keys_school",
             item_id_getter=lambda x: x,
             id="grades",
-            on_click=on_program_clicked
-        )),
+            on_click=on_program_clicked_sch
+        ), width=3),
         Cancel(Const("⏪ Назад")),
-        # getter=get_data_programs,
+        getter=get_data_programs,
         parse_mode=ParseMode.HTML,
-        state=ProgramsSG.choose_program
+        state=ProgramsSG_sch.choose_program
     ),
     Window(
         Format('{program_info}'),
+        SwitchTo(Const('FAQ по программе'), id="faq_sch", state=ProgramsSG_sch.faq),
+        Url(
+            Const("Зарегистрироваться!"),
+            Format('{link}'),
+        ),
         Back(Const("⏪ Назад")),
         getter=get_data_programs,
         parse_mode=ParseMode.HTML,
-        state=ProgramsSG.program_info
+        state=ProgramsSG_sch.program_info
+    ),
+    Window(
+        Format('{faq}'),
+        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.ask),
+        Back(Const("⏪ Назад")),
+        getter=get_data_programs,
+        parse_mode=ParseMode.HTML,
+        state=ProgramsSG_sch.faq
     ),
     launch_mode=LaunchMode.SINGLE_TOP
 )
 
-# Регистрируем диалоги
-MyBot.register_dialogs(registration_dialog, user_menu_dialog, programs_dialog, question_dialog)
+programs_dialog_std = Dialog(
+    Window(
+        Format("{programs_list_student}"),
+        Group(Select(
+            Format("{item}"),
+            items="keys_students",
+            item_id_getter=lambda x: x,
+            id="grades",
+            on_click=on_program_clicked_std
+        ), width=3),
+        Cancel(Const("⏪ Назад")),
+        getter=get_data_programs,
+        parse_mode=ParseMode.HTML,
+        state=ProgramsSG_std.choose_program
+    ),
+    Window(
+        Format('{program_info}'),
+        SwitchTo(Const('FAQ по программе'), id="faq_std", state=ProgramsSG_std.faq),
+        Url(
+            Const("Зарегистрироваться!"),
+            Format('{link}'),
+        ),
+        Back(Const("⏪ Назад")),
+        getter=get_data_programs,
+        parse_mode=ParseMode.HTML,
+        state=ProgramsSG_std.program_info
+    ),
+    Window(
+        Format('{faq}'),
+        Start(Const("Отправить вопрос в Brainz! ❓"), id="qu", state=QuestionsSG.ask),
+        Back(Const("⏪ Назад")),
+        getter=get_data_programs,
+        parse_mode=ParseMode.HTML,
+        state=ProgramsSG_std.faq
+    ),
+    launch_mode=LaunchMode.SINGLE_TOP
+)

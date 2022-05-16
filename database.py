@@ -7,22 +7,17 @@ from tortoise.models import Model
 
 # Зарегситрировавшиеся пользователи добавляются в базу данных
 class ActiveUsers(Model):
-    user_id = fields.IntField(pk=True)
+    user_id = fields.BigIntField(pk=True)
+    is_admin = fields.BooleanField()
+    password = fields.TextField(null=True)
     code_name = fields.TextField()
     user_name = fields.TextField()
     grade = fields.TextField()
+    link = fields.TextField(null=True)
     questions: fields.ReverseRelation["Questions"]
 
     class Meta:
         table = "users"
-
-
-# Таблица с администраторами
-class Admins(Model):
-    user_id = fields.IntField()
-
-    class Meta:
-        table = "admins"
 
 
 # Таблица с вопросами
@@ -38,14 +33,26 @@ class Questions(Model):
 
 
 class Programs(Model):
-    key = fields.IntField(pk=True)
-    text = fields.TextField()
-    is_student = fields.TextField()
-
-    # is_active = fields.BooleanField()
+    id = fields.BigIntField(pk=True)
+    key = fields.IntField()
+    name = fields.TextField()
+    description = fields.TextField()
+    faq = fields.TextField()
+    info = fields.TextField()
+    category = fields.TextField()
+    is_active = fields.BooleanField()
+    link = fields.TextField()
 
     class Meta:
-        table = "programs_student"
+        table = "programs"
+
+class FAQ(Model):
+    id = fields.IntField(pk=True)
+    text = fields.TextField()
+
+    class Meta:
+        table = "faq"
+
 
 
 # Инициализация базы данных
@@ -57,7 +64,7 @@ async def run():
                     "engine": "tortoise.backends.asyncpg",
                     "credentials": {
                         "database": "postgres",
-                        "host": "172.18.0.2",
+                        "host": "brainz-pg", # 172.18.0.2(В зависимости от настроек brainz-net)
                         "password": "postgres",
                         "port": 5432,
                         "user": "postgres"

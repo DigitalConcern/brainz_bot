@@ -192,9 +192,9 @@ menu_admin_dialog = Dialog(
     Window(
         Const("Выберите действие 🤔"),
         SwitchTo(Const("Посмотреть неотвеченные вопросы ❓"), id="qu", state=AdminSG.unanswered),
-        Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
+        Start(Const("Я хочу создать пост ✉️"), id="po", state=PostSG.post),
         Url(Const("Изменить информацию ℹ️"), Format("{link}")),
-        Start(Const("Я хочу побыть юзером! 😈"), id="uss", state=UserSG.admin_menu),
+        Start(Const("Я хочу побыть юзером 😈"), id="uss", state=UserSG.admin_menu),
         MessageInput(answer_handler, content_types=["text", "photo"]),
         state=AdminSG.admin,
         getter=get_data

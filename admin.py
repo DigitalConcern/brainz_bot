@@ -65,6 +65,7 @@ class AdminSG(StatesGroup):
     admin = State()
     check = State()
     unanswered = State()
+    check_no = State()
 
 
 # Класс состояний ветки диалога с ответами на вопросы
@@ -142,7 +143,10 @@ async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
                     # Записываем имя юзера в данные состояния
                     manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i[0]).values_list(
                         "user_id__code_name", flat=True))[0]
-                    await manager.dialog().switch_to(AdminSG.check)
+                    if manager.current_context().dialog_data["answer"] != "":
+                        await manager.dialog().switch_to(AdminSG.check)
+                    else:
+                        await manager.dialog().switch_to(AdminSG.check_no)  # Если ответа нет
                     return
                 else:
                     await MyBot.bot.send_message(manager.current_context().dialog_data["id"],
@@ -181,6 +185,14 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
 
+# Обрабатываем сообщение о отсутствии ответа на вопрос
+async def on_no_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
+    await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
+    await MyBot.bot.send_message(c.from_user.id, "Вопрос остался без ответа...")
+    await manager.done()
+    await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
+
+
 # Корневой диалог админа
 menu_admin_dialog = Dialog(
     Window(
@@ -190,7 +202,7 @@ menu_admin_dialog = Dialog(
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
         Url(Const("Изменить информацию ℹ️"), Format("{link}")),
         Start(Const("Я хочу побыть юзером! 😈"), id="uss", state=UserSG.admin_menu),
-        MessageInput(answer_handler,content_types=["text", "photo"]),
+        MessageInput(answer_handler, content_types=["text", "photo"]),
         state=AdminSG.admin,
         getter=get_data
     ),
@@ -209,13 +221,26 @@ menu_admin_dialog = Dialog(
         getter=get_data
     ),
     Window(
+        Format('<b>Вы решили оставить вопрос</b> {ticket}\n'
+               '<b>Без ответа?</b> '
+               '<b>Получатель:</b> {questioner}\n'
+               ),
+        Column(
+            Button(Const("Всё верно! ✅"), id="yes", on_click=on_no_answer_ok_clicked),
+            Back(Const("⏪ Назад"))
+        ),
+        parse_mode=ParseMode.HTML,
+        state=AdminSG.check_no,
+        getter=get_data
+    ),
+    Window(
         Format('Неотвеченные сообщения:\n'
                '<b>{unansw_list}</b>'
                ),
         Column(
             SwitchTo(Const("⏪ Назад"), id="bc", state=AdminSG.admin)
         ),
-        MessageInput(answer_handler,content_types=["text", "photo"]),
+        MessageInput(answer_handler, content_types=["text", "photo"]),
         parse_mode=ParseMode.HTML,
         state=AdminSG.unanswered,
         getter=get_data

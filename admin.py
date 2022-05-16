@@ -197,9 +197,8 @@ async def on_no_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dia
 # Корневой диалог админа
 menu_admin_dialog = Dialog(
     Window(
-        Const("Выбери действие 🤔"),
-        # Start(Const("Я хочу ответить на вопрос! ✅"), id="an", state=AnswerSG.answer),
-        SwitchTo(Const("Посмотреть неотвеченные вопросы"), id="qu", state=AdminSG.unanswered),
+        Const("Выберите действие 🤔"),
+        SwitchTo(Const("Посмотреть неотвеченные вопросы ❓"), id="qu", state=AdminSG.unanswered),
         Start(Const("Я хочу создать пост! ✉️"), id="po", state=PostSG.post),
         Url(Const("Изменить информацию ℹ️"), Format("{link}")),
         Start(Const("Я хочу побыть юзером! 😈"), id="uss", state=UserSG.admin_menu),
@@ -320,30 +319,4 @@ post_dialog = Dialog(
     launch_mode=LaunchMode.SINGLE_TOP
 )
 
-# Ветка с ответом на вопрос
-# answer_dialog = Dialog(
-# Window(
-#     Const("Пожалуйста, напишите текст ответа на вопрос"),
-#     MessageInput(answer_handler),
-#     Cancel(Const("⏪ Назад")),
-#     state=AnswerSG.answer
-# ),
-# Window(
-#     Format('<b>Пожалуйста, проверьте корректность введённых данных</b>\n'
-#            '<b>Тикет:</b> {ticket} <i>{is_answered}</i>\n'
-#            '<b>Ответ:</b> {answer}\n'
-#            '<b>Получатель:</b> {questioner}\n'
-#            ),
-#     Column(
-#         Button(Const("Всё верно! ✅"), id="yes", on_click=on_answer_ok_clicked),
-#         Back(Const("⏪ Назад"))
-#     ),
-#     parse_mode=ParseMode.HTML,
-#     state=AnswerSG.check,
-#     getter=get_data
-# ),
-#     launch_mode=LaunchMode.SINGLE_TOP
-# )
-
-# MyBot.register_dialogs(menu_admin_dialog, answer_dialog, post_dialog)
 MyBot.register_dialogs(menu_admin_dialog, post_dialog)

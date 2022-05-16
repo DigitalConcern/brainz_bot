@@ -11,6 +11,7 @@ from database import ActiveUsers, Questions, Programs, FAQ
 from bot import MyBot
 from config import Counter, Names, CHAT_ID
 
+
 # PS: Надо подумать как редачить руками таблицы в docker, потому что нужно закинуть в таблицы
 # список админов и инфу про программы
 
@@ -227,13 +228,16 @@ question_dialog = Dialog(
 async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     # Достаем из базы тексты всех программ
     programs_students = list(
-        await Programs.filter(category="students").order_by("key").values_list("description", flat=True))
+        await Programs.filter(category="students", is_active=True).order_by("key").values_list("description",
+                                                                                               flat=True))
     names_students = list(await Programs.filter(category="students").order_by("key").values_list("name", flat=True))
     keys_students = list(await Programs.filter(category="students").order_by("key").values_list("key", flat=True))
+
     programs_school = list(
-        await Programs.filter(category="school").order_by("key").values_list("description", flat=True))
+        await Programs.filter(category="school", is_active=True).order_by("key").values_list("description", flat=True))
     names_school = list(await Programs.filter(category="school").order_by("key").values_list("name", flat=True))
     keys_school = list(await Programs.filter(category="school").order_by("key").values_list("key", flat=True))
+
     preview_students = ''
     preview_school = ''
 
@@ -242,7 +246,7 @@ async def get_data_programs(dialog_manager: DialogManager, **kwargs):
     if preview_students == '':
         preview_students = "Активных программ нет"
     for i in range(len(programs_school)):
-        preview_school = f'<b>{keys_school[i]}. {names_school[i]}</b>\n{programs_school[i]}\n\n'
+        preview_school += f'<b>{keys_school[i]}. {names_school[i]}</b>\n{programs_school[i]}\n\n'
     if preview_school == '':
         preview_school = "Активных программ нет"
     return {

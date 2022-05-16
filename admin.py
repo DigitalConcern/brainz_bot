@@ -68,13 +68,6 @@ class AdminSG(StatesGroup):
     check_no = State()
 
 
-# Класс состояний ветки диалога с ответами на вопросы
-# class AnswerSG(StatesGroup):
-#     answer = State()
-#     ticket = State()
-#     check = State()
-
-
 # Класс состояний ветки диалога с постом
 class PostSG(StatesGroup):
     post = State()
@@ -234,7 +227,8 @@ menu_admin_dialog = Dialog(
         getter=get_data
     ),
     Window(
-        Format('Неотвеченные сообщения:\n'
+        Format('Для удаление вопроса из списка ответьте на это сообщение его хештегом, например, #120\n'
+               'Неотвеченные сообщения:\n'
                '<b>{unansw_list}</b>'
                ),
         Column(

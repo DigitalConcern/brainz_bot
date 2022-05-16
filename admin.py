@@ -188,7 +188,7 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
 # Обрабатываем сообщение о отсутствии ответа на вопрос
 async def on_no_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
-    await MyBot.bot.send_message(c.from_user.id, "Вопрос остался без ответа...")
+    await MyBot.bot.send_message(c.from_user.id, str("Вопрос "+manager.current_context().dialog_data["ticket"]+" остался без ответа..."))
     await manager.done()
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 

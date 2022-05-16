@@ -143,7 +143,7 @@ async def answer_handler(m: Message, dialog: Dialog, manager: DialogManager):
                     # Записываем имя юзера в данные состояния
                     manager.current_context().dialog_data["questioner"] = (await Questions.filter(key=i[0]).values_list(
                         "user_id__code_name", flat=True))[0]
-                    if manager.current_context().dialog_data["answer"] != "":
+                    if manager.current_context().dialog_data["answer"].replace(" ", "") != "":
                         await manager.dialog().switch_to(AdminSG.check)
                     else:
                         await manager.dialog().switch_to(AdminSG.check_no)  # Если ответа нет
@@ -188,7 +188,8 @@ async def on_answer_ok_clicked(c: CallbackQuery, button: Button, manager: Dialog
 # Обрабатываем сообщение о отсутствии ответа на вопрос
 async def on_no_answer_ok_clicked(c: CallbackQuery, button: Button, manager: DialogManager):
     await Questions.filter(key=manager.current_context().dialog_data["ticket"]).update(is_answered=True)
-    await MyBot.bot.send_message(c.from_user.id, str("Вопрос "+manager.current_context().dialog_data["ticket"]+" остался без ответа..."))
+    await MyBot.bot.send_message(c.from_user.id, str("Вопрос " + manager.current_context().dialog_data[
+        "ticket"] + " остался без ответа..."))
     await manager.done()
     await manager.start(AdminSG.admin, mode=StartMode.RESET_STACK)
 
@@ -227,7 +228,7 @@ menu_admin_dialog = Dialog(
                ),
         Column(
             Button(Const("Всё верно! ✅"), id="yes", on_click=on_no_answer_ok_clicked),
-            Back(Const("⏪ Назад"))
+            SwitchTo(Const("⏪ Назад"), id="bc", state=AdminSG.admin)
         ),
         parse_mode=ParseMode.HTML,
         state=AdminSG.check_no,
